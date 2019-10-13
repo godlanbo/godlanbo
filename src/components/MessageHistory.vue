@@ -10,7 +10,7 @@
           </el-col>
           <el-col :span="2">&nbsp;——</el-col>
           <el-col :span="11">
-            <el-time-picker placeholder="选择时间" v-model="formInline.date2" style="width: 100%;"></el-time-picker>
+            <el-date-picker placeholder="选择日期" v-model="formInline.date2" style="width: 100%;"></el-date-picker>
           </el-col>
         </el-form-item>
         <el-form-item >
@@ -58,6 +58,7 @@
         <el-pagination
           @current-change="handleCurrentPage"
           layout="prev, pager, next, jumper"
+          :current-page="resetPage"
           :page-size="20"
           :total="totalInfoNum">
         </el-pagination>
@@ -74,7 +75,8 @@ export default {
         date1: '',
         date2: ''
       },
-      totalInfoNum: 1000,
+      resetPage: 1,
+      totalInfoNum: 1,
       dialogText: '',
       tableData: [{
         MessageTo: '1312000000',
@@ -138,7 +140,16 @@ export default {
     searchInfo (formdate) {
       this.$refs[formdate].validate((valid) => {
         if (valid) {
-          //
+          this.$axios.post('/api/get_store_info', this.formInline)
+            .then(response => {
+              console.log(response)
+              // this.tableData = response.data.info
+              // this.totalInfoNum = response.data.totalInfoNum
+            })
+            .catch(function (error) {
+              console.log(error)
+            })
+          this.resetPage = 1
         } else {
           return false
         }
@@ -149,10 +160,32 @@ export default {
       this.dialogVisible = true
     },
     handleCurrentPage (val) {
-      // xxx
+      this.getDate(val)
     },
-    getDate () {
-      // xxx
+    getDate (pagenumber) {
+      let loading = this.$loading({target: document.querySelector('.el-table')})
+      this.$axios.post('/api/get_store_info', {pageNumber: pagenumber, searchState: this.$store.state.searchState})
+        .then(response => {
+          console.log(response)
+          // this.tableData = response.data.info
+          // this.totalInfoNum = response.data.totalInfoNum
+          loading.close()
+        })
+        .catch(function (error) {
+          console.log(error)
+          loading.close()
+        })
+    },
+    getFirstInfo (pagenumber) {
+      this.$axios.post('/api/get_store_info', {pageNumber: pagenumber, searchState: this.$store.state.searchState})
+        .then(response => {
+          console.log(response)
+          // this.tableData = response.data.info
+          // this.totalInfoNum = response.data.totalInfoNum
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
     }
   },
   created () {

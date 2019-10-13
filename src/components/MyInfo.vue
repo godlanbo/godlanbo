@@ -23,6 +23,7 @@
                 <el-input v-model="formInline.ip" placeholder=" " disabled></el-input>
             </el-form-item>
             <el-form-item>
+                <el-button type="primary" @click="saveModify">保存修改</el-button>
                 <el-button type="default" @click="modifyPass('ruleForm')">修改密码</el-button>
             </el-form-item>
         </el-form>
@@ -82,11 +83,11 @@ export default {
     // }
     return {
       formInline: {
-        account: 'admin',
-        company: 'xxx',
-        telnum: '131200000000',
-        privilegeLevel: '管理员',
-        ip: '0.0.0.0'
+        account: '',
+        company: '',
+        telnum: '',
+        privilegeLevel: '',
+        ip: ''
       },
       oldPassCheck: false,
       ruleForm: {
@@ -103,24 +104,23 @@ export default {
     }
   },
   methods: {
-    save_add () {
-      // this.$confirm('是否保存?', '提示', {
-      //   confirmButtonText: '确定',
-      //   cancelButtonText: '取消',
-      //   type: 'warning'
-      // }).then(() => {
-      //   console.log(this.formInline)
-      //   this.$message({
-      //     type: 'success',
-      //     message: '保存成功!'
-      //   })
-      // }).catch(() => {
-      //   this.$message({
-      //     type: 'info',
-      //     message: '取消添加'
-      //   })
-      // })
-      this.dialogVisible = true
+    saveModify () {
+      this.$confirm('是否保存?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        console.log(this.formInline)
+        this.$message({
+          type: 'success',
+          message: '保存成功!'
+        })
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '取消添加'
+        })
+      })
     },
     modifyPass (formdate) {
       this.dialogVisible = true
@@ -141,8 +141,19 @@ export default {
       })
     },
     getDate () {
-      // xxx
+      this.$axios.get('/api/personal_info')
+        .then(response => {
+          console.log(response)
+          this.formInline = response.data.info
+          // this.totalInfoNum = response.data.totalInfoNum
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
     }
+  },
+  created () {
+    this.getDate()
   }
 }
 </script>
@@ -191,8 +202,14 @@ export default {
   left: 0;
   margin-left: 35px;
 }
+.formInfo>>>button.el-button.el-button--primary{
+  margin-left: 550px;
+  margin-top:15px;
+  padding-right: 50px;
+  padding-left: 50px;
+}
 .formInfo>>>button.el-button.el-button--default{
-  margin-left: 855px;
+  margin-left: 145px;
   margin-top:15px;
   padding-right: 50px;
   padding-left: 50px;

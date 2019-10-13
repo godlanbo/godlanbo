@@ -12,7 +12,7 @@
         </el-select>
       </el-form-item>
       <el-form-item>
-        <el-button type="primary">查询</el-button>
+        <el-button type="primary" @click="searchInfo">查询</el-button>
       </el-form-item>
       </el-form>
       <el-button @click="deleteSelectInfo">
@@ -43,6 +43,7 @@
         <el-pagination
           @current-change="handleCurrentPage"
           layout="prev, pager, next, jumper"
+          :current-page.sync="resetPage"
           :page-size="20"
           :total="totalInfoNum">
         </el-pagination>
@@ -54,49 +55,19 @@ export default {
   name: 'RecycleBin',
   data () {
     return {
-      totalInfoNum: 1000,
+      totalInfoNum: 1,
       formTable: {
         keyword: '',
         timeFrame: ''
       },
-      tableInfo: [{
-        account: '13100002121',
-        company: '上海企业',
-        telnum: '13100002121',
-        privilegeLevel: '普通用户',
-        password: '123456',
-        ip: '0.0.0.0',
-        deleteTime: '2019-12-20 10:00:20'
-      }, {
-        account: '13100002121',
-        company: '内江企业',
-        telnum: '13100002121',
-        privilegeLevel: '普通用户',
-        password: '123456',
-        ip: '0.0.0.0',
-        deleteTime: '2019-12-20 10:00:20'
-      }, {
-        account: '13100002121',
-        company: '大红企业',
-        telnum: '13100002121',
-        privilegeLevel: '普通用户',
-        password: '123456',
-        ip: '0.0.0.0',
-        deleteTime: '2019-12-20 10:00:20'
-      }, {
-        account: '13100002121',
-        company: '123企业',
-        telnum: '13100002121',
-        privilegeLevel: '普通用户',
-        password: '123456',
-        ip: '0.0.0.0',
-        deleteTime: '2019-12-20 10:00:20'
-      }],
+      resetPage: 1,
+      tableInfo: [],
       multipleTable: []
     }
   },
   created () {
     // 请求数据
+    this.getFristDate(1)
   },
   methods: {
     RecoveryInfo (index, row) {
@@ -105,11 +76,17 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        this.tableInfo.splice(index, 1)
-        this.$message({
-          type: 'success',
-          message: '恢复成功!'
-        })
+        this.$axios.post('/api/re_user', row)
+          .then(response => {
+            this.$message({
+              type: 'success',
+              message: '恢复成功!'
+            })
+            this.getDate(this.resetPage)
+          })
+          .catch(function (error) {
+            console.log(error)
+          })
       }).catch(() => {
         this.$message({
           type: 'info',
@@ -117,18 +94,60 @@ export default {
         })
       })
     },
+    searchInfo () {
+      let loading = this.$loading({target: document.querySelector('.el-table')})
+      this.$axios.post('/api/get_re_user', this.formTable)
+        .then(response => {
+          this.tableInfo = response.data.info
+          loading.close()
+          this.resetPage = 1
+        })
+        .catch(function (error) {
+          console.log(error)
+          loading.close()
+        })
+    },
+    getFristDate (pagenumber) {
+      this.$axios.post('/api/get_re_user', {pageNumber: pagenumber, searchState: this.$store.state.searchState})
+        .then(response => {
+          this.tableInfo = response.data.re_user_info
+          this.totalInfoNum = response.data.totalInfoNum
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+    },
+    getDate (pagenumber) {
+      console.log(-1)
+      let loading = this.$loading({target: document.querySelector('.el-table')})
+      this.$axios.post('/api/get_re_user', {pageNumber: pagenumber, searchState: this.$store.state.searchState})
+        .then(response => {
+          this.tableInfo = response.data.re_user_info
+          this.totalInfoNum = response.data.totalInfoNum
+          loading.close()
+        })
+        .catch(function (error) {
+          console.log(error)
+          loading.close()
+        })
+    },
     PermanentlyDelete (index, row) {
       this.$confirm('是否彻底删除该用户信息?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        this.tableInfo.splice(index, 1)
-        // 向后端请求恢复数据
-        this.$message({
-          type: 'success',
-          message: '删除成功!'
-        })
+        this.$axios.post('/api/del_re_user', row)
+          .then(response => {
+            this.$message({
+              type: 'success',
+              message: '删除成功!'
+            })
+            this.getDate(this.resetPage)
+          })
+          .catch(function (error) {
+            console.log(error)
+          })
       }).catch(() => {
         this.$message({
           type: 'info',
@@ -149,13 +168,17 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        this.tableInfo = this.tableInfo.concat(this.multipleTable).filter(function (value, index, tempArr) {
-          return tempArr.indexOf(value) === tempArr.lastIndexOf(value)
-        })
-        this.$message({
-          type: 'success',
-          message: '删除成功!'
-        })
+        this.$axios.post('/api/del_re_user', this.multipleTable)
+          .then(response => {
+            this.$message({
+              type: 'success',
+              message: '删除成功!'
+            })
+            this.getDate(this.resetPage)
+          })
+          .catch(function (error) {
+            console.log(error)
+          })
       }).catch(() => {
         this.$message({
           type: 'info',
@@ -173,14 +196,17 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        this.tableInfo = this.tableInfo.concat(this.multipleTable).filter(function (value, index, tempArr) {
-          return tempArr.indexOf(value) === tempArr.lastIndexOf(value)
-        })
-        // 向后端请求恢复数据
-        this.$message({
-          type: 'success',
-          message: '恢复成功!'
-        })
+        this.$axios.post('/api/re_user', this.multipleTable)
+          .then(response => {
+            this.$message({
+              type: 'success',
+              message: '恢复成功!'
+            })
+            this.getDate(this.resetPage)
+          })
+          .catch(function (error) {
+            console.log(error)
+          })
       }).catch(() => {
         this.$message({
           type: 'info',
@@ -189,7 +215,7 @@ export default {
       })
     },
     handleCurrentPage (val) {
-      // xxx
+      this.getDate(val)
     }
   }
 }

@@ -42,9 +42,15 @@ export default {
           this.tempLoading = this.$loading({target: document.querySelector('.el-form')})
           this.$axios.post('/api/check_account', this.user).then(res => {
             this.$store.commit('InitializationLoginLevel', res.data.right)
-            this.$router.replace({
-              path: '/admin'
-            })
+            if (this.$store.state.loginLevel === 'superRoot' || this.$store.state.loginLevel === 'Root') {
+              this.$router.replace({
+                path: '/admin'
+              })
+            } else {
+              this.$router.replace({
+                path: '/user'
+              })
+            }
           }).catch(err => {
             alert('登陆失败')
             console.log(err)

@@ -119,6 +119,7 @@ const router = new Router({
   mode: 'history'
 })
 router.beforeEach((to, from, next) => {
+  console.log(to.meta.login_required)
   if (to.meta.login_required) {
     next()
   } else {

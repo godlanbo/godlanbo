@@ -135,7 +135,7 @@ export default {
     return {
       tableDateRowIndex: 0,
       dialogVisible: false,
-      totalInfoNum: 1,
+      totalInfoNum: 10,
       textarea: '',
       formInline: {
         keyword: '',
@@ -181,12 +181,16 @@ export default {
       // 提交数据到后端查询，接受返回数据
       this.$refs[formdate].validate((valid) => {
         if (valid) {
-          this.$axios.post('/api/search', this.formInline)
+          let loading = this.$loading({target: document.querySelector('.el-table')})
+          this.$axios.post('/api/search_store_info', this.formInline)
             .then(response => {
+              this.$store.commit('OpenSearchState')
               this.tableData = response.data.info
+              loading.close()
             })
             .catch(function (error) {
               console.log(error)
+              loading.close()
             })
           this.resetPage = 1
         } else {
@@ -195,6 +199,7 @@ export default {
       })
     },
     handleCurrentPage (val) {
+      console.log(this.resetPage)
       this.getDate(val)
     },
     updateform (obj, index) {
@@ -206,6 +211,7 @@ export default {
       // this.tableData[this.tableData.length] = obj
     },
     handleEdit (index, row) {
+      console.log(row)
       this.tableDateRowIndex = index
       this.$store.commit('FixMainJudge')
       this.$store.commit('FixEditJudge')
@@ -255,8 +261,22 @@ export default {
       this.dialogVisible = false
     },
     getDate (pagenumber) {
-      this.$axios.post('/api/get_store_info', {pageNumber: pagenumber})
+      let loading = this.$loading({target: document.querySelector('.el-table')})
+      this.$axios.post('/api/get_store_info', {pageNumber: pagenumber, searchState: this.$store.state.searchState})
         .then(response => {
+          this.tableData = response.data.info
+          this.totalInfoNum = response.data.totalInfoNum
+          loading.close()
+        })
+        .catch(function (error) {
+          console.log(error)
+          loading.close()
+        })
+    },
+    getTheFristInfo (pagenumber) {
+      this.$axios.post('/api/get_store_info', {pageNumber: pagenumber, searchState: this.$store.state.searchState})
+        .then(response => {
+          console.log(response)
           this.tableData = response.data.info
           this.totalInfoNum = response.data.totalInfoNum
         })
@@ -273,8 +293,8 @@ export default {
   },
   created () {
     // getDate 在页面加载前获取数据
-    // this.$store.commit('ResetLoading')
-    this.getDate(1)
+    this.$store.commit('ResetSearchState')
+    this.getTheFristInfo(1)
     this.$store.commit('InitializationMainJudge')
     this.$store.commit('InitializationEditJudge')
     this.$store.commit('InitializationAddJudge')

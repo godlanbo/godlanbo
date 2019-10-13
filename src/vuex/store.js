@@ -2,15 +2,13 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 
 Vue.use(Vuex)
-// 刚看vuex，不熟
 const state = {
   MainJudge: true,
   EditJudge: false,
   AddJudge: false,
-  token: true,
   loginLevel: 'superRoot',
   automaticGrabState: false,
-  loading: true
+  searchState: false
 }
 const mutations = {
   FixEditJudge (state) {
@@ -21,14 +19,6 @@ const mutations = {
   },
   FixMainJudge (state) {
     state.MainJudge = !state.MainJudge
-  },
-  changeLogin (state, userToken) {
-    localStorage.setItem('Authorization', userToken)
-    state.token = true
-  },
-  removeLogin (state) {
-    localStorage.setItem('Authorization', null)
-    state.token = false
   },
   InitializationMainJudge (state) {
     state.MainJudge = true
@@ -45,11 +35,11 @@ const mutations = {
   InitializationAutomaticGrabState (state, nowState) {
     state.automaticGrabState = nowState
   },
-  InitializationLoading (state) {
-    state.loading = false
+  ResetSearchState (state) {
+    state.searchState = false
   },
-  ResetLoading (state) {
-    state.loading = true
+  OpenSearchState (state) {
+    state.searchState = true
   }
 }
 

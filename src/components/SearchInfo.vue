@@ -37,11 +37,11 @@
     </el-form>
 
       <el-table  ref="multipleTable" :data="tableData"  height="610" stripe>
-        <el-table-column prop="name" label="商户名称" >
+        <el-table-column prop="store_name" label="商户名称" >
         </el-table-column>
         <!-- <el-table-column prop="level" label="质量评级" >
         </el-table-column> -->
-        <el-table-column prop="address" label="地址" >
+        <el-table-column prop="store_address" label="地址" >
         </el-table-column>
         <!-- <el-table-column label="链接">
           <template slot-scope="scope">
@@ -51,7 +51,7 @@
         </el-table-column> -->
         <!-- <el-table-column prop="adminName" label="联系人">
         </el-table-column> -->
-        <el-table-column prop="phonenumber" label="电话">
+        <el-table-column prop="phone_number" label="电话">
         </el-table-column>
         <!-- <el-table-column prop="infofrom" label="信息来源">
         </el-table-column>
@@ -62,6 +62,7 @@
         <el-pagination
           @current-change="handleCurrentPage"
           layout="prev, pager, next, jumper"
+          :current-page.sync="resetPage"
           :page-size="20"
           :total="totalInfoNum">
         </el-pagination>
@@ -76,6 +77,7 @@ export default {
   data () {
     return {
       tableDateRowIndex: 0,
+      resetPage: 1,
       totalInfoNum: 1000,
       formInline: {
         keyword: '',
@@ -87,47 +89,44 @@ export default {
       rules: {
         keyword: [{required: true, message: '不能为空', trigger: 'blur'}]
       },
-      tableData: [{
-        name: '由睿婚礼策划',
-        level: '五星好评',
-        address: '新华街',
-        linkAddress: 'http://www.google.com',
-        adminName: '张三',
-        phonenumber: '13100000000',
-        infofrom: '自动抓取',
-        path: '美团',
-        sp_info: '已经联系过一次',
-        fixTime: '2019-12-20 10:00:20'
-      }, {
-        name: '由睿婚礼策划',
-        level: '五星好评',
-        address: '新华街',
-        linkAddress: 'http://www.google.com',
-        adminName: '张三',
-        phonenumber: '13100000000',
-        infofrom: '自动抓取',
-        path: '美团',
-        sp_info: '已经联系过一次',
-        fixTime: '2019-12-20 10:00:20'
-      }]
+      tableData: []
     }
   },
   methods: {
     submitSearch (formdate) {
       // 提交数据到后端查询，接受返回数据
+      let loading = this.$loading({target: document.querySelector('.el-table')})
       this.$refs[formdate].validate((valid) => {
         if (valid) {
-          console.log(1)
+          this.$axios.post('/api/search_store_info', this.formInline)
+            .then(response => {
+              this.tableData = response.data.info
+              loading.close()
+              this.resetPage = 1
+            })
+            .catch(function (error) {
+              console.log(error)
+              loading.close()
+            })
         } else {
           return false
         }
       })
     },
     handleCurrentPage (val) {
-      console.log(val)
       // 传递给后端，重新获取数据
+      this.getDate(val)
     },
-    getPageDate (pagenumber) {
+    getDate (pagenumber) {
+      this.$axios.post('/api/search_store_info', {pageNumber: pagenumber, searchState: this.$store.state.searchState})
+        .then(response => {
+          this.tableData = response.data.info
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+    },
+    getFirstInfo (pagenumber) {
       console.log(pagenumber)
       // this.$axios.post('xxx', pagenumber)
       //   .then(response => {
@@ -146,7 +145,7 @@ export default {
   },
   created () {
     // getDate 在页面加载前获取数据
-    this.getPageDate(1)
+    this.getFirstInfo(1)
   }
 }
 </script>
@@ -157,7 +156,7 @@ export default {
   line-height: 60px;
 }
 .SearchInfo>>>.el-table {
-  margin-bottom: 50px;
+  margin-bottom: 30px;
 }
 </style>
 <style>

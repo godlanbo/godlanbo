@@ -18,7 +18,7 @@ Vue.config.productionTip = false
 // 请求拦截器
 axios.interceptors.request.use(
   config => {
-    if (store.state.token) {
+    if (localStorage.getItem('Authorization') !== null || localStorage.getItem('Authorization') !== undefined) {
       config.headers.Authorization = localStorage.getItem('Authorization')
     }
     return config
@@ -30,14 +30,14 @@ axios.interceptors.request.use(
 axios.interceptors.response.use(
   response => {
     if (response.headers.code === 10010 || response.headers.code === 10011) {
+      alert('登录超时')
       localStorage.setItem('Authorization', null)
       router.replace({
         path: '/Login'
       })
     } else {
-      store.commit('changeLogin', response.headers.authorization)
+      localStorage.setItem('Authorization', response.headers.authorization)
     }
-    store.commit('InitializationLoading')
     return response
   },
   error => {
@@ -46,7 +46,6 @@ axios.interceptors.response.use(
     } else if (error.response.status === 500) {
       alert('服务器出错')
     }
-    store.commit('InitializationLoading')
     return Promise.reject(error.response.data)
   })
 

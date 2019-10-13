@@ -65,7 +65,7 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        localStorage.clear()
+        localStorage.setItem('Authorization', null)
         this.$message({
           type: 'success',
           message: '退出登录!'
@@ -101,6 +101,7 @@ export default {
   color: #ffd04c;
 }
 .el-header {
+  position: relative;
   background: repeating-linear-gradient(45deg, #333, rgb(84, 92, 100) 50px);
   color: #f5f7fa;
   line-height: 60px;
@@ -136,7 +137,8 @@ h1{
   margin-top:20px;
 }
 .loginOut{
-  margin-left: 1600px;
+  margin-top: 1%;
+  float: right;
   background-color: rgb(80, 88, 95);
   color: #f5f7fa;
   border: 1px solid #363737;

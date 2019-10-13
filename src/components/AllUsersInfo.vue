@@ -57,6 +57,7 @@
         <el-pagination
           @current-change="handleCurrentPage"
           layout="prev, pager, next, jumper"
+          :current-page.sync="resetPage"
           :page-size="20"
           :total="totalInfoNum">
         </el-pagination>
@@ -79,8 +80,9 @@ export default {
       AllUsersInfo: true,
       EditUserInfo: false,
       usersDateRowIndex: 0,
-      totalInfoNum: 1000,
+      totalInfoNum: 1,
       index: '',
+      resetPage: 1,
       usersDate: [],
       multipleTable: [],
       searchKeyWord: ''
@@ -91,6 +93,7 @@ export default {
   },
   watch: {
     index: function (val) {
+      this.resetPage = 1
       switch (this.index) {
         case '1':
           this.getDate(1)
@@ -107,26 +110,31 @@ export default {
       this.EditUserInfo = !this.EditUserInfo
     },
     handleCurrentPage (val) {
-      // 123
+      this.getDate(val)
     },
     getDate (pagenumber) {
-      this.$axios.post('/api/get_user_info', {pageNumber: pagenumber})
+      let loading = this.$loading({target: document.querySelector('.el-table')})
+      this.$axios.post('/api/get_user_info', {pageNumber: pagenumber, searchState: this.$store.state.searchState})
         .then(response => {
           this.usersDate = response.data.user_info
+          loading.close()
         })
         .catch(function (error) {
           console.log(error)
+          loading.close()
         })
     },
     searchInfo () {
-      // submit this.searchInfo
-      // this.$axios.post('/api/check_account', this.searchInfo).then(res => {
-      //   this.$store.commit('InitializationLoginLevel', res.data.loginInfo)
-      //   this.$router.replace({
-      //     path: '/admin'
-      //   })
-      // }).catch(err => { alert('登陆失败'); console.log(err) })
-      console.log('submit')
+      let loading = this.$loading({target: document.querySelector('.el-table')})
+      this.$axios.post('/api/get_user_info', {searchKeyWord: this.searchKeyWord})
+        .then(response => {
+          this.usersDate = response.data.user_info
+          loading.close()
+        })
+        .catch(function (error) {
+          console.log(error)
+          loading.close()
+        })
     },
     updateInfo (obj, index) {
       this.AllUsersInfo = !this.AllUsersInfo
@@ -208,7 +216,6 @@ export default {
       }).then(() => {
         this.$axios.post('/api/del_user', row)
           .then(response => {
-            console.log(response)
             this.usersDate.splice(index, 1)
             this.$message({
               type: 'success',

@@ -64,6 +64,7 @@
         <el-pagination
           @current-change="handleCurrentPage"
           layout="prev, pager, next, jumper"
+          :current-page.sync="resetPage"
           :page-size="20"
           :total="totalInfoNum">
         </el-pagination>
@@ -77,6 +78,7 @@ export default {
     return {
       dialogText: '',
       totalInfoNum: 1000,
+      resetPage: 1,
       dialogVisible: false,
       formInline: {
         MessageTo: '',
@@ -117,17 +119,32 @@ export default {
       })
     },
     getDate (pagenumber) {
-      this.$axios.post('/api/get_store_info', {pageNumber: pagenumber})
+      let loading = this.$loading({target: document.querySelector('.el-table')})
+      this.$axios.post('/api/get_store_info', {pageNumber: pagenumber, searchState: this.$store.state.searchState})
         .then(response => {
           console.log(response)
           // this.tableData = response.data.info
+          // this.totalInfoNum = response.data.totalInfoNum
+          loading.close()
+        })
+        .catch(function (error) {
+          console.log(error)
+          loading.close()
+        })
+    },
+    getFirstInfo (pagenumber) {
+      this.$axios.post('/api/get_store_info', {pageNumber: pagenumber, searchState: this.$store.state.searchState})
+        .then(response => {
+          console.log(response)
+          // this.tableData = response.data.info
+          // this.totalInfoNum = response.data.totalInfoNum
         })
         .catch(function (error) {
           console.log(error)
         })
     },
     handleCurrentPage (val) {
-      // xxx
+      this.getDate(val)
     },
     handleSelectionChange (val) {
       this.multipleSelection = val
@@ -139,14 +156,17 @@ export default {
     searchInfo (formdate) {
       this.$refs[formdate].validate((valid) => {
         if (valid) {
-          // xxx
-          // this.$axios.post('/api/get_store_info', this.formInline)
-          //   .then(response => {
-          //     this.tableData = response.data.info
-          //   })
-          //   .catch(function (error) {
-          //     console.log(error)
-          //   })
+          let loading = this.$loading({target: document.querySelector('.el-table')})
+          this.$axios.post('/api/get_store_info', this.formInline)
+            .then(response => {
+              this.tableData = response.data.info
+              loading.close()
+              this.resetPage = 1
+            })
+            .catch(function (error) {
+              console.log(error)
+              loading.close()
+            })
         } else {
           return false
         }
@@ -154,7 +174,7 @@ export default {
     }
   },
   created () {
-    this.getDate(1)
+    this.getFirstInfo(1)
   }
 }
 </script>
