@@ -102,6 +102,7 @@ export default {
             .then(response => {
               this.tableData = response.data.info
               loading.close()
+              this.$store.commit('OpenSearchState')
               this.resetPage = 1
             })
             .catch(function (error) {
@@ -145,6 +146,8 @@ export default {
   },
   created () {
     // getDate 在页面加载前获取数据
+    this.$store.commit('InitializationLoginLevel', localStorage.getItem('loginLevel'))
+    this.$store.commit('ResetSearchState')
     this.getFirstInfo(1)
   }
 }

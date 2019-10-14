@@ -54,7 +54,6 @@ export default {
       }).then(() => {
         this.$axios.post('/api/add_user', this.formInline)
           .then(response => {
-            console.log(response)
             this.$message({
               type: 'success',
               message: '添加成功!'
@@ -70,6 +69,9 @@ export default {
         })
       })
     }
+  },
+  created () {
+    this.$store.commit('InitializationLoginLevel', localStorage.getItem('loginLevel'))
   }
 }
 </script>

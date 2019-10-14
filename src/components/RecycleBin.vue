@@ -67,6 +67,7 @@ export default {
   },
   created () {
     // 请求数据
+    this.$store.commit('ResetSearchState')
     this.getFristDate(1)
   },
   methods: {
@@ -96,11 +97,13 @@ export default {
     },
     searchInfo () {
       let loading = this.$loading({target: document.querySelector('.el-table')})
-      this.$axios.post('/api/get_re_user', this.formTable)
+      this.$axios.post('/api/search_re_user', this.formTable)
         .then(response => {
-          this.tableInfo = response.data.info
+          console.log(response)
+          this.tableInfo = response.data.re_user_info
           loading.close()
           this.resetPage = 1
+          this.$store.commit('OpenSearchState')
         })
         .catch(function (error) {
           console.log(error)

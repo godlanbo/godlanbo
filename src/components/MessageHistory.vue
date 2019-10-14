@@ -25,9 +25,9 @@
           type="selection"
           width="55">
         </el-table-column>
-        <el-table-column prop="MessageTo" label="发送对象" width="403"></el-table-column>
-        <el-table-column prop="sendTime" label="发送时间" width="403"></el-table-column>
-        <el-table-column prop="MessageInfo" label="详细信息" width="403">
+        <el-table-column prop="MessageTo" label="发送对象"></el-table-column>
+        <el-table-column prop="sendTime" label="发送时间"></el-table-column>
+        <el-table-column prop="MessageInfo" label="详细信息">
           <div slot-scope="scope">
             <el-button
               type="text"
@@ -48,11 +48,11 @@
             </el-dialog>
           </div>
         </el-table-column>
-        <el-table-column label="操作" width="403">
+        <!-- <el-table-column label="操作" width="403">
           <div slot-scope="scope">
             <el-button type="danger" size="mini" @click="deleteHistoryInfo(scope.$index, scope.row)">删除</el-button>
           </div>
-        </el-table-column>
+        </el-table-column> -->
       </el-table>
       <div class="block">
         <el-pagination
@@ -145,6 +145,7 @@ export default {
               console.log(response)
               // this.tableData = response.data.info
               // this.totalInfoNum = response.data.totalInfoNum
+              // this.$store.commit('OpenSearchState')
             })
             .catch(function (error) {
               console.log(error)
@@ -189,7 +190,8 @@ export default {
     }
   },
   created () {
-    this.getDate()
+    this.$store.commit('ResetSearchState')
+    this.getFirstInfo()
   }
 }
 </script>
@@ -243,15 +245,4 @@ body{
   margin-top: 10px;
   padding-top: 0px;
 }
-/*.el-header {
-  background-color:  #808080;
-  color: #333;
-  line-height: 60px;
-}*/
-/*.el-aside {
-  background-color: rgb(238, 241, 246);
-  text-align: center;
-  line-height: 60px;
-  height: 800px;
-}*/
 </style>

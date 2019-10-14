@@ -122,7 +122,6 @@ export default {
       let loading = this.$loading({target: document.querySelector('.el-table')})
       this.$axios.post('/api/get_store_info', {pageNumber: pagenumber, searchState: this.$store.state.searchState})
         .then(response => {
-          console.log(response)
           // this.tableData = response.data.info
           // this.totalInfoNum = response.data.totalInfoNum
           loading.close()
@@ -162,6 +161,7 @@ export default {
               this.tableData = response.data.info
               loading.close()
               this.resetPage = 1
+              this.$store.commit('OpenSearchState')
             })
             .catch(function (error) {
               console.log(error)
@@ -174,6 +174,7 @@ export default {
     }
   },
   created () {
+    this.$store.commit('ResetSearchState')
     this.getFirstInfo(1)
   }
 }

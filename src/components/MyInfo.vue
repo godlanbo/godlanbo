@@ -13,7 +13,7 @@
                 <el-input v-model="formInline.telnum" placeholder=" " ></el-input>
             </el-form-item>
             <el-form-item label="用户等级:" >
-                <el-input v-model="formInline.privilegeLevel" placeholder=" " disabled></el-input>
+                <el-input v-model="formInline.right" placeholder=" " disabled></el-input>
             </el-form-item>
 
             <!-- <el-form-item label="密码:" >
@@ -86,9 +86,16 @@ export default {
         account: '',
         company: '',
         telnum: '',
-        privilegeLevel: '',
+        right: '',
         ip: ''
       },
+      // checkModify: {
+      //   account: '',
+      //   company: '',
+      //   telnum: '',
+      //   right: '',
+      //   ip: ''
+      // },
       oldPassCheck: false,
       ruleForm: {
         oldPass: '',
@@ -110,11 +117,21 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        console.log(this.formInline)
-        this.$message({
-          type: 'success',
-          message: '保存成功!'
-        })
+        let loading = this.$loading({target: document.querySelector('.el-table')})
+        this.$axios.post('/api/modify_personal_info', this.formInline)
+          .then(response => {
+            console.log(response)
+            this.formInline = response.data
+            loading.close()
+            this.$message({
+              type: 'success',
+              message: '保存成功!'
+            })
+          })
+          .catch(function (error) {
+            loading.close()
+            console.log(error)
+          })
       }).catch(() => {
         this.$message({
           type: 'info',
@@ -133,9 +150,19 @@ export default {
       this.$refs[formdate].validate((valid) => {
         if (valid) {
           // getDate
-          this.dialogVisible = false
+          this.$axios.post('/api/modify_password', this.ruleForm)
+            .then(response => {
+              console.log(response)
+              if (response.data.success === false) {
+                this.oldPassCheck = true
+                return
+              }
+              this.dialogVisible = false
+            })
+            .catch(function (error) {
+              console.log(error)
+            })
         } else {
-          this.oldPassCheck = true
           return false
         }
       })
@@ -144,8 +171,7 @@ export default {
       this.$axios.get('/api/personal_info')
         .then(response => {
           console.log(response)
-          this.formInline = response.data.info
-          // this.totalInfoNum = response.data.totalInfoNum
+          this.formInline = response.data
         })
         .catch(function (error) {
           console.log(error)
@@ -154,6 +180,7 @@ export default {
   },
   created () {
     this.getDate()
+    // this.checkModify = this.formInline
   }
 }
 </script>

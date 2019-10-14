@@ -66,6 +66,7 @@ export default {
         type: 'warning'
       }).then(() => {
         localStorage.setItem('Authorization', null)
+        localStorage.setItem('loginLevel', null)
         this.$message({
           type: 'success',
           message: '退出登录!'

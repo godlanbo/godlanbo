@@ -276,7 +276,7 @@ export default {
     getTheFristInfo (pagenumber) {
       this.$axios.post('/api/get_store_info', {pageNumber: pagenumber, searchState: this.$store.state.searchState})
         .then(response => {
-          console.log(response)
+          // console.log(response)
           this.tableData = response.data.info
           this.totalInfoNum = response.data.totalInfoNum
         })
@@ -293,6 +293,7 @@ export default {
   },
   created () {
     // getDate 在页面加载前获取数据
+    this.$store.commit('InitializationLoginLevel', localStorage.getItem('loginLevel'))
     this.$store.commit('ResetSearchState')
     this.getTheFristInfo(1)
     this.$store.commit('InitializationMainJudge')

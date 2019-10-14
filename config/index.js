@@ -14,7 +14,6 @@ module.exports = {
         '/api':{
             target:"http://192.168.7.132:5555/",
             changeOrigin:true,
-            
         }
     },
 

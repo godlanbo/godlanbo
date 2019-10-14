@@ -130,6 +130,7 @@ export default {
   },
   created () {
     // this.automaticGrabState = this.$store.state.automaticGrabState
+    this.$store.commit('InitializationLoginLevel', localStorage.getItem('loginLevel'))
     this.getDate()
   },
   computed: {

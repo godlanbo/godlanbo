@@ -77,6 +77,9 @@ export default {
     cancel () {
       this.$emit('cancel')
     }
+  },
+  created () {
+    this.$store.commit('InitializationLoginLevel', localStorage.getItem('loginLevel'))
   }
 }
 </script>

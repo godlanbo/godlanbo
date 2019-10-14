@@ -89,6 +89,8 @@ export default {
     }
   },
   created () {
+    this.$store.commit('InitializationLoginLevel', localStorage.getItem('loginLevel'))
+    this.$store.commit('ResetSearchState')
     this.index = '1'
   },
   watch: {
@@ -126,10 +128,12 @@ export default {
     },
     searchInfo () {
       let loading = this.$loading({target: document.querySelector('.el-table')})
-      this.$axios.post('/api/get_user_info', {searchKeyWord: this.searchKeyWord})
+      this.$axios.post('/api/search_user', {keyword: this.searchKeyWord})
         .then(response => {
           this.usersDate = response.data.user_info
+          this.$store.commit('OpenSearchState')
           loading.close()
+          this.resetPage = 1
         })
         .catch(function (error) {
           console.log(error)

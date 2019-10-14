@@ -6,7 +6,7 @@ const state = {
   MainJudge: true,
   EditJudge: false,
   AddJudge: false,
-  loginLevel: 'superRoot',
+  loginLevel: '',
   automaticGrabState: false,
   searchState: false
 }
