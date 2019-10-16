@@ -31,7 +31,7 @@
       <el-form-item>
         <el-button type="primary" @click="submitSearch('search')">查询</el-button>
         <el-button @click="addInformation">新增</el-button>
-        <el-button >导出</el-button>
+        <el-button @click="outPutInfo">导出</el-button>
         <el-button type="primary" @click="sendMessage" v-if="$store.state.loginLevel == 'superRoot'">群发短信</el-button>
       </el-form-item>
     </el-form>
@@ -43,7 +43,7 @@
         height="590"
         @selection-change="handleSelectionChange"
         stripe
-        >
+        v-loading="theFirstGet">
         <el-table-column
           type="selection"
           width="55">
@@ -92,7 +92,7 @@
           @current-change="handleCurrentPage"
           layout="prev, pager, next, jumper"
           :current-page.sync="resetPage"
-          :page-size="2"
+          :page-size="20"
           :total="totalInfoNum">
         </el-pagination>
       </div>
@@ -151,7 +151,8 @@ export default {
         path: [{required: true, message: '不能为空', trigger: 'blur'}]
       },
       tableData: [],
-      multipleSelection: []
+      multipleSelection: [],
+      theFirstGet: true
     }
   },
   methods: {
@@ -176,6 +177,28 @@ export default {
         day = '0' + day
       }
       return year + '-' + month + '-' + day + ' ' + hour + ':' + minutes + ':' + sec
+    },
+    outPutInfo () {
+      if (this.multipleSelection.length === 0) {
+        this.$alert('请勾选商户后再导出！', '注意', '确定')
+        return
+      }
+      this.$axios.post('/api/output_info', this.multipleSelection)
+        .then(response => {
+          if (!response) {
+            return
+          }
+          let url = window.URL.createObjectURL(new Blob([response.data]))
+          let link = document.createElement('a')
+          link.style.display = 'none'
+          link.href = url
+          link.setAttribute('download', 'excel.csv')
+          document.body.appendChild(link)
+          link.click()
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
     },
     submitSearch (formdate) {
       // 提交数据到后端查询，接受返回数据
@@ -276,9 +299,9 @@ export default {
     getTheFristInfo (pagenumber) {
       this.$axios.post('/api/get_store_info', {pageNumber: pagenumber, searchState: this.$store.state.searchState})
         .then(response => {
-          // console.log(response)
           this.tableData = response.data.info
           this.totalInfoNum = response.data.totalInfoNum
+          this.theFirstGet = false
         })
         .catch(function (error) {
           console.log(error)

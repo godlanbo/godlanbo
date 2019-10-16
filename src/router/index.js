@@ -116,7 +116,8 @@ const router = new Router({
       ]
     }
   ],
-  mode: 'history'
+  mode: 'history',
+  base: process.env.BASE_URL
 })
 router.beforeEach((to, from, next) => {
   if (to.meta.login_required) {
@@ -126,7 +127,7 @@ router.beforeEach((to, from, next) => {
       next()
     } else {
       let token = localStorage.getItem('Authorization')
-      if (token === null || token === undefined) {
+      if (token === 'null' || token === undefined) {
         next('/Login')
       } else {
         next()

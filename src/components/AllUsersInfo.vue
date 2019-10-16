@@ -4,12 +4,12 @@
     <span>用户信息</span>
     <el-divider></el-divider>
     <el-menu mode="horizontal" :default-active="index" @select="handleSelect">
-      <el-menu-item index="1">全部</el-menu-item>
-      <el-menu-item index="2">普通用户</el-menu-item>
-      <el-menu-item index="3">铜牌用户</el-menu-item>
-      <el-menu-item index="4">银牌用户</el-menu-item>
-      <el-menu-item index="5">金牌用户</el-menu-item>
-      <el-menu-item index="6" v-if="$store.state.loginLevel == 'superRoot'">管理员</el-menu-item>
+      <el-menu-item index="0">全部</el-menu-item>
+      <el-menu-item index="1">普通用户</el-menu-item>
+      <el-menu-item index="2">铜牌用户</el-menu-item>
+      <el-menu-item index="3">银牌用户</el-menu-item>
+      <el-menu-item index="4">金牌用户</el-menu-item>
+      <el-menu-item index="5">管理员</el-menu-item>
     </el-menu>
     <el-button @click="deleteSelectInfo">
       <i class="el-icon-finished">批量删除</i>
@@ -19,15 +19,15 @@
         <i class="el-icon-finished">变更用户权限</i>
       </span>
       <el-dropdown-menu slot="dropdown">
-        <el-dropdown-item command="a">普通用户</el-dropdown-item>
-        <el-dropdown-item command="b">铜牌用户</el-dropdown-item>
-        <el-dropdown-item command="c">银牌用户</el-dropdown-item>
-        <el-dropdown-item command="d">金牌用户</el-dropdown-item>
+        <el-dropdown-item command="1">普通用户</el-dropdown-item>
+        <el-dropdown-item command="2">铜牌用户</el-dropdown-item>
+        <el-dropdown-item command="3">银牌用户</el-dropdown-item>
+        <el-dropdown-item command="4">金牌用户</el-dropdown-item>
       </el-dropdown-menu>
     </el-dropdown>
     <el-input v-model="searchKeyWord" placeholder="用户相关信息"></el-input>
     <el-button type="primary" @click="searchInfo">查询</el-button>
-    <el-table ref="multipleTable" :data="usersDate"  height="580" @selection-change="handleSelectionChange" stripe>
+    <el-table ref="multipleTable" :data="usersDate"  height="580" @selection-change="handleSelectionChange" stripe v-loading="theFirstGet">
       <el-table-column
           type="selection"
           width="55">
@@ -37,7 +37,7 @@
       <el-table-column prop="telnum" label="公司电话"></el-table-column>
       <el-table-column prop="companyBoss" label="公司负责人"></el-table-column>
       <el-table-column prop="right" label="用户等级"></el-table-column>
-      <el-table-column prop="password" label="密码"></el-table-column>
+      <!-- <el-table-column prop="password" label="密码"></el-table-column> -->
       <el-table-column prop="ip" label="IP地址"></el-table-column>
       <el-table-column  label="操作">
         <template slot-scope="scope">
@@ -64,7 +64,7 @@
       </div>
    </div>
    <div v-if="EditUserInfo">
-     <EditUserInfo @save_edit="updateInfo" @cancel="switchPage" :date="usersDate[usersDateRowIndex]" :id="usersDateRowIndex"></EditUserInfo>
+     <EditUserInfo @save_edit="updateInfo" @cancel="switchPage" :date="usersDate[usersDateRowIndex]"></EditUserInfo>
    </div>
   </div>
 </template>
@@ -81,29 +81,22 @@ export default {
       EditUserInfo: false,
       usersDateRowIndex: 0,
       totalInfoNum: 1,
-      index: '',
+      index: '0',
       resetPage: 1,
       usersDate: [],
       multipleTable: [],
-      searchKeyWord: ''
+      searchKeyWord: '',
+      theFirstGet: true
     }
   },
   created () {
     this.$store.commit('InitializationLoginLevel', localStorage.getItem('loginLevel'))
     this.$store.commit('ResetSearchState')
-    this.index = '1'
+    this.getFirstInfo(1)
   },
   watch: {
     index: function (val) {
-      this.resetPage = 1
-      switch (this.index) {
-        case '1':
-          this.getDate(1)
-          break
-        case '2':
-          this.getDate(1)
-          break
-      }
+      this.searchInfo()
     }
   },
   methods: {
@@ -119,6 +112,7 @@ export default {
       this.$axios.post('/api/get_user_info', {pageNumber: pagenumber, searchState: this.$store.state.searchState})
         .then(response => {
           this.usersDate = response.data.user_info
+          this.totalInfoNum = response.data.totalInfoNum
           loading.close()
         })
         .catch(function (error) {
@@ -126,9 +120,20 @@ export default {
           loading.close()
         })
     },
+    getFirstInfo (pagenumber) {
+      this.$axios.post('/api/get_user_info', {pageNumber: pagenumber, searchState: this.$store.state.searchState})
+        .then(response => {
+          this.usersDate = response.data.user_info
+          this.totalInfoNum = response.data.totalInfoNum
+          this.theFirstGet = false
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+    },
     searchInfo () {
       let loading = this.$loading({target: document.querySelector('.el-table')})
-      this.$axios.post('/api/search_user', {keyword: this.searchKeyWord})
+      this.$axios.post('/api/search_user', {keyword: this.searchKeyWord, group: this.index})
         .then(response => {
           this.usersDate = response.data.user_info
           this.$store.commit('OpenSearchState')
@@ -140,10 +145,10 @@ export default {
           loading.close()
         })
     },
-    updateInfo (obj, index) {
+    updateInfo () {
       this.AllUsersInfo = !this.AllUsersInfo
       this.EditUserInfo = !this.EditUserInfo
-      this.usersDate[index] = obj
+      this.getDate(this.resetPage)
     },
     deleteSelectInfo () {
       if (this.multipleTable.length === 0) {
@@ -155,13 +160,20 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        this.usersDate = this.usersDate.concat(this.multipleTable).filter(function (value, index, tempArr) {
-          return tempArr.indexOf(value) === tempArr.lastIndexOf(value)
-        })
-        this.$message({
-          type: 'success',
-          message: '删除成功!'
-        })
+        this.$axios.post('/api/del_user', this.multipleTable)
+          .then(response => {
+            if (this.multipleTable.length === this.usersDate.length) {
+              this.resetPage -= 1
+            }
+            this.getDate(this.resetPage)
+            this.$message({
+              type: 'success',
+              message: '删除成功!'
+            })
+          })
+          .catch(function (error) {
+            console.log(error)
+          })
       }).catch(() => {
         this.$message({
           type: 'info',
@@ -178,24 +190,17 @@ export default {
           cancelButtonText: '取消',
           type: 'warning'
         }).then(() => {
-          switch (command) {
-            case 'a':
-              this.multipleTable.map(i => { i.right = '普通用户' })
-              break
-            case 'b':
-              this.multipleTable.map(i => { i.right = '铜牌用户' })
-              break
-            case 'c':
-              this.multipleTable.map(i => { i.right = '银牌用户' })
-              break
-            case 'd':
-              this.multipleTable.map(i => { i.right = '金牌用户' })
-              break
-          }
-          this.$message({
-            type: 'success',
-            message: '操作成功!'
-          })
+          this.$axios.post('/api/modify_right', {toRight: command, allUser: this.multipleTable})
+            .then(response => {
+              this.getDate(this.resetPage)
+              this.$message({
+                type: 'success',
+                message: '操作成功!'
+              })
+            })
+            .catch(function (error) {
+              console.log(error)
+            })
         }).catch(() => {
           this.$message({
             type: 'info',

@@ -12,7 +12,15 @@
 // import InformationManagement from './components/InformationManagement'
 // import EditInformation from './components/EditInformation'
 export default {
-  name: 'app'
+  name: 'app',
+  created () {
+    let temp = localStorage.getItem('loginLevel')
+    if (temp === 'null' || temp === undefined) {
+      if (this.$route.path !== '/Login') {
+        this.$router.push('/Login')
+      }
+    }
+  }
   // components: {
   //   admin, Message, MessageHistory, InformationManagement, EditInformation
   // }

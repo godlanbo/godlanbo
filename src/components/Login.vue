@@ -45,7 +45,7 @@ export default {
             console.log(res)
             localStorage.setItem('Authorization', res.headers.authorization)
             localStorage.setItem('loginLevel', res.data.right)
-            if (this.$store.state.loginLevel === 'superRoot' || this.$store.state.loginLevel === 'Root') {
+            if (localStorage.getItem('loginLevel') === 'superRoot' || localStorage.getItem('loginLevel') === 'Root') {
               this.$router.replace({
                 path: '/admin'
               })

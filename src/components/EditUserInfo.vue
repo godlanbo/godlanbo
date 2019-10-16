@@ -32,7 +32,7 @@
                 <el-input v-model="formInline.ip" placeholder=" " disabled></el-input>
             </el-form-item>
             <el-form-item>
-                <el-button type="button" @click="save_add">保存</el-button>
+                <el-button type="primary" @click="save_add">保存</el-button>
                 <el-button  @click="cancel">取消</el-button>
             </el-form-item>
         </el-form>
@@ -41,7 +41,7 @@
 <script>
 export default {
   name: 'EditUserInfo',
-  props: ['date', 'id'],
+  props: ['date'],
   data () {
     return {
       formInline: {
@@ -62,11 +62,18 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        this.$emit('save_edit', this.formInline, this.id)
-        this.$message({
-          type: 'success',
-          message: '保存成功!'
-        })
+        this.$axios.post('/api/modify_user_info', this.formInline)
+          .then(response => {
+            this.formInline = response.data
+            this.$message({
+              type: 'success',
+              message: '保存成功!'
+            })
+            this.$emit('save_edit')
+          })
+          .catch(function (error) {
+            console.log(error)
+          })
       }).catch(() => {
         this.$message({
           type: 'info',
@@ -95,14 +102,14 @@ export default {
 .el-form>>>.el-form-item__label{
   margin-left: 470px;
 }
-.el-form>>>button.el-button.el-button--button{
-  margin-left: 590px;
+.el-form>>>button.el-button.el-button--primary{
+  margin-left: 560px;
   margin-top:15px;
   padding-right: 50px;
   padding-left: 50px;
 }
 .el-form>>>button.el-button.el-button--default{
-  margin-left: 100px;
+  margin-left: 200px;
   margin-top:15px;
   padding-right: 50px;
   padding-left: 50px;

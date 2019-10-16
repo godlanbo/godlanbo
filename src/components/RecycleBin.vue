@@ -21,7 +21,7 @@
       <el-button @click="recoverySelectInfo">
         <i class="el-icon-finished">批量恢复</i>
       </el-button>
-      <el-table ref="multipleTable" :data="tableInfo"  height="610" stripe @selection-change="handleSelectionChange">
+      <el-table ref="multipleTable" :data="tableInfo"  height="610" stripe @selection-change="handleSelectionChange" v-loading="theFirstGet">
         <el-table-column
           type="selection"
           width="55">
@@ -60,6 +60,7 @@ export default {
         keyword: '',
         timeFrame: ''
       },
+      theFirstGet: true,
       resetPage: 1,
       tableInfo: [],
       multipleTable: []
@@ -68,7 +69,7 @@ export default {
   created () {
     // 请求数据
     this.$store.commit('ResetSearchState')
-    this.getFristDate(1)
+    this.getFirstDate(1)
   },
   methods: {
     RecoveryInfo (index, row) {
@@ -110,18 +111,18 @@ export default {
           loading.close()
         })
     },
-    getFristDate (pagenumber) {
+    getFirstDate (pagenumber) {
       this.$axios.post('/api/get_re_user', {pageNumber: pagenumber, searchState: this.$store.state.searchState})
         .then(response => {
           this.tableInfo = response.data.re_user_info
           this.totalInfoNum = response.data.totalInfoNum
+          this.theFirstGet = false
         })
         .catch(function (error) {
           console.log(error)
         })
     },
     getDate (pagenumber) {
-      console.log(-1)
       let loading = this.$loading({target: document.querySelector('.el-table')})
       this.$axios.post('/api/get_re_user', {pageNumber: pagenumber, searchState: this.$store.state.searchState})
         .then(response => {

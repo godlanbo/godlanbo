@@ -17,14 +17,14 @@
           <el-col :push="12"><el-button type="primary" @click="searchInfo('search')">查看</el-button></el-col>
         </el-form-item>
       </el-form>
-      <el-button @click="deleteSelectInfo">
+      <!-- <el-button @click="deleteSelectInfo">
         <i class="el-icon-finished">批量删除</i>
-      </el-button>
-      <el-table  ref="multipleTable" :data="tableData"  height="610" stripe @selection-change="handleSelectionChange">
-        <el-table-column
+      </el-button> -->
+      <el-table  :data="tableData"  height="610" stripe v-loading="theFirstGet">
+        <!-- <el-table-column
           type="selection"
           width="55">
-        </el-table-column>
+        </el-table-column> -->
         <el-table-column prop="MessageTo" label="发送对象"></el-table-column>
         <el-table-column prop="sendTime" label="发送时间"></el-table-column>
         <el-table-column prop="MessageInfo" label="详细信息">
@@ -78,6 +78,7 @@ export default {
       resetPage: 1,
       totalInfoNum: 1,
       dialogText: '',
+      theFirstGet: true,
       tableData: [{
         MessageTo: '1312000000',
         sendTime: '2019-12-20 10:00:20',
@@ -87,24 +88,19 @@ export default {
         sendTime: '2019-12-20 10:00:20',
         MessageInfo: '尊敬的客户：近期电信诈骗行为频发，请小心防范；如您有积分兑换需求，请自行登录中国移动积分商城官网https://m.jf.10086.cn/兑换；值此国庆佳节之际，内江移动温馨提示您：请提前预存足额话费，避免影响正常通信。如有出国计划，请提前拨打10086开通国长国漫功能。祝您愉快度过国庆长假。【中国移动】'
       }],
-      dialogVisible: false,
-      multipleTable: []
+      dialogVisible: false
     }
   },
   methods: {
     deleteSelectInfo () {
-      if (this.multipleTable.length === 0) {
-        this.$alert('请勾选信息后再操作！', '注意', '确定')
-        return
-      }
       this.$confirm('是否删除选中的信息?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        this.tableData = this.tableData.concat(this.multipleTable).filter(function (value, index, tempArr) {
-          return tempArr.indexOf(value) === tempArr.lastIndexOf(value)
-        })
+        // this.tableData = this.tableData.concat(this.multipleTable).filter(function (value, index, tempArr) {
+        //   return tempArr.indexOf(value) === tempArr.lastIndexOf(value)
+        // })
         this.$message({
           type: 'success',
           message: '删除成功!'
@@ -133,9 +129,6 @@ export default {
           message: '已取消删除'
         })
       })
-    },
-    handleSelectionChange (val) {
-      this.multipleTable = val
     },
     searchInfo (formdate) {
       this.$refs[formdate].validate((valid) => {
@@ -183,6 +176,7 @@ export default {
           console.log(response)
           // this.tableData = response.data.info
           // this.totalInfoNum = response.data.totalInfoNum
+          // this.theFirstGet = false
         })
         .catch(function (error) {
           console.log(error)

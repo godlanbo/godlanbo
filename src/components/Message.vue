@@ -26,7 +26,7 @@
         <el-col :push="12"><el-button type="primary" @click="searchInfo('search')">查询</el-button></el-col>
       </el-form-item>
     </el-form>
-    <el-table :data="tableData"  height="610" stripe>
+    <el-table :data="tableData"  height="610" stripe v-loading="theFirstGet">
      <el-table-column prop="MessageTo" label="发送对象" width="335"></el-table-column>
      <el-table-column prop="sendTime" label="发送时间" width="335"></el-table-column>
      <el-table-column prop="sendNow" label="发送状态" width="335"></el-table-column>
@@ -80,6 +80,7 @@ export default {
       totalInfoNum: 1000,
       resetPage: 1,
       dialogVisible: false,
+      theFirstGet: true,
       formInline: {
         MessageTo: '',
         sendNow: '',
@@ -137,6 +138,7 @@ export default {
           console.log(response)
           // this.tableData = response.data.info
           // this.totalInfoNum = response.data.totalInfoNum
+          // this.theFirstGet = false
         })
         .catch(function (error) {
           console.log(error)

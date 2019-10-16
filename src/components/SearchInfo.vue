@@ -5,58 +5,24 @@
         <el-form-item label="关键字" prop="keyword">
           <el-input v-model="formInline.keyword" placeholder="相关信息"></el-input>
         </el-form-item>
-        <!-- <el-form-item label="信息来源" label-width="100px" prop="infofrom">
-          <el-select v-model="formInline.infofrom" placeholder="请选择">
-            <el-option label="自动抓取" value="自动抓取"></el-option>
-            <el-option label="手动生成" value="手动生成"></el-option>
-            <el-option label="全部" value="全部"></el-option>
-          </el-select>
-        </el-form-item>
-        <el-form-item label="渠道" label-width="100px" prop="path">
-          <el-select v-model="formInline.path" placeholder="请选择">
-            <el-option label="美团" value="美团"></el-option>
-            <el-option label="饿了么" value="饿了么"></el-option>
-            <el-option label="大众点评" value="大众点评"></el-option>
-            <el-option label="口碑" value="口碑"></el-option>
-            <el-option label="全部" value="全部"></el-option>
-          </el-select>
-        </el-form-item>
-        <el-form-item label="更新时间" label-width="100px">
-          <el-col :span="11">
-            <el-date-picker type="date" placeholder="选择日期" v-model="formInline.date1" style="width: 100%;"></el-date-picker>
-          </el-col>
-          <el-col :span="2">&nbsp;——</el-col>
-          <el-col :span="11">
-            <el-time-picker placeholder="选择时间" v-model="formInline.date2" style="width: 100%;"></el-time-picker>
-          </el-col>
-        </el-form-item> -->
       <el-form-item>
         <el-button type="primary" @click="submitSearch('search')">查询</el-button>
-        <el-button :disabled="$store.state.loginLevel !=='jinpai'">导出</el-button>
+        <el-button :disabled="$store.state.loginLevel !=='jinpai'" @click="outputInfo">导出</el-button>
       </el-form-item>
     </el-form>
 
-      <el-table  ref="multipleTable" :data="tableData"  height="610" stripe>
+      <el-table  ref="multipleTable" :data="tableData"  height="610" stripe v-loading="theFirstGet">
+        <el-table-column
+          type="selection"
+          width="55"
+          v-if="$store.state.loginLevel !=='jinpai'">
+        </el-table-column>
         <el-table-column prop="store_name" label="商户名称" >
         </el-table-column>
-        <!-- <el-table-column prop="level" label="质量评级" >
-        </el-table-column> -->
         <el-table-column prop="store_address" label="地址" >
         </el-table-column>
-        <!-- <el-table-column label="链接">
-          <template slot-scope="scope">
-            <a :href="''+tableData[scope.$index].linkAddress" target="_blank">{{tableData[scope.$index].linkAddress}}</a>
-          </template>
-
-        </el-table-column> -->
-        <!-- <el-table-column prop="adminName" label="联系人">
-        </el-table-column> -->
         <el-table-column prop="phone_number" label="电话">
         </el-table-column>
-        <!-- <el-table-column prop="infofrom" label="信息来源">
-        </el-table-column>
-        <el-table-column prop="path" label="渠道">
-        </el-table-column> -->
       </el-table>
       <div class="block">
         <el-pagination
@@ -78,7 +44,7 @@ export default {
     return {
       tableDateRowIndex: 0,
       resetPage: 1,
-      totalInfoNum: 1000,
+      totalInfoNum: 1,
       formInline: {
         keyword: '',
         infofrom: '',
@@ -86,6 +52,7 @@ export default {
         date1: '',
         date2: ''
       },
+      theFirstGet: true,
       rules: {
         keyword: [{required: true, message: '不能为空', trigger: 'blur'}]
       },
@@ -114,28 +81,54 @@ export default {
         }
       })
     },
-    handleCurrentPage (val) {
-      // 传递给后端，重新获取数据
-      this.getDate(val)
-    },
-    getDate (pagenumber) {
-      this.$axios.post('/api/search_store_info', {pageNumber: pagenumber, searchState: this.$store.state.searchState})
+    outputInfo () {
+      if (this.multipleSelection.length === 0) {
+        this.$alert('请勾选商户后再导出！', '注意', '确定')
+        return
+      }
+      this.$axios.post('/api/output_info', this.multipleSelection)
         .then(response => {
-          this.tableData = response.data.info
+          if (!response) {
+            return
+          }
+          let url = window.URL.createObjectURL(new Blob([response.data]))
+          let link = document.createElement('a')
+          link.style.display = 'none'
+          link.href = url
+          link.setAttribute('download', 'excel.csv')
+          document.body.appendChild(link)
+          link.click()
         })
         .catch(function (error) {
           console.log(error)
         })
     },
+    handleCurrentPage (val) {
+      // 传递给后端，重新获取数据
+      this.getDate(val)
+    },
+    getDate (pagenumber) {
+      let loading = this.$loading({target: document.querySelector('.el-table')})
+      this.$axios.post('/api/search_store_info', this.formInline)
+        .then(response => {
+          this.tableData = response.data.info
+          loading.close()
+        })
+        .catch(function (error) {
+          console.log(error)
+          loading.close()
+        })
+    },
     getFirstInfo (pagenumber) {
-      console.log(pagenumber)
-      // this.$axios.post('xxx', pagenumber)
-      //   .then(response => {
-
-      //   })
-      //   .catch(function (error) {
-      //     console.log(error)
-      //   })
+      this.$axios.post('/api/get_store_info', {pageNumber: pagenumber, searchState: this.$store.state.searchState})
+        .then(response => {
+          this.theFirstGet = false
+          this.tableData = response.data.info
+          this.totalInfoNum = response.data.totalInfoNum
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
     }
   },
   mounted () {

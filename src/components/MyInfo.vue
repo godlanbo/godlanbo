@@ -2,7 +2,7 @@
   <div class="MyInfo">
     <span>个人资料</span>
         <el-divider></el-divider>
-        <el-form :model="formInline" label-width="80px" class="formInfo">
+        <el-form :model="formInline" label-width="80px" class="formInfo" v-loading="theFirstGet">
             <el-form-item label="账号:" >
                 <el-input v-model="formInline.account" placeholder=" " disabled></el-input>
             </el-form-item>
@@ -89,13 +89,14 @@ export default {
         right: '',
         ip: ''
       },
-      // checkModify: {
-      //   account: '',
-      //   company: '',
-      //   telnum: '',
-      //   right: '',
-      //   ip: ''
-      // },
+      checkModify: {
+        account: '',
+        company: '',
+        telnum: '',
+        right: '',
+        ip: ''
+      },
+      theFirstGet: true,
       oldPassCheck: false,
       ruleForm: {
         oldPass: '',
@@ -112,6 +113,10 @@ export default {
   },
   methods: {
     saveModify () {
+      if (this.checkModify === this.formInline) {
+        this.$alert('没有要保存的修改', '注意', '确定')
+        return
+      }
       this.$confirm('是否保存?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
@@ -153,7 +158,7 @@ export default {
           this.$axios.post('/api/modify_password', this.ruleForm)
             .then(response => {
               console.log(response)
-              if (response.data.success === false) {
+              if (!response.data.success) {
                 this.oldPassCheck = true
                 return
               }
@@ -170,8 +175,8 @@ export default {
     getDate () {
       this.$axios.get('/api/personal_info')
         .then(response => {
-          console.log(response)
           this.formInline = response.data
+          this.theFirstGet = false
         })
         .catch(function (error) {
           console.log(error)
@@ -180,7 +185,7 @@ export default {
   },
   created () {
     this.getDate()
-    // this.checkModify = this.formInline
+    this.checkModify = this.formInline
   }
 }
 </script>

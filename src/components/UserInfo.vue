@@ -2,7 +2,7 @@
   <div class="UserInfo">
     <span>个人资料</span>
         <el-divider></el-divider>
-        <el-form :model="formInline" label-width="80px" class="formInfo">
+        <el-form :model="formInline" label-width="80px" class="formInfo" v-loading="theFirstGet">
             <el-form-item label="账号:" >
                 <el-input v-model="formInline.account" placeholder=" " disabled></el-input>
             </el-form-item>
@@ -13,7 +13,7 @@
                 <el-input v-model="formInline.telnum" placeholder=" " disabled></el-input>
             </el-form-item>
             <el-form-item label="用户等级:" >
-                <el-input v-model="formInline.privilegeLevel" placeholder=" " disabled></el-input>
+                <el-input v-model="formInline.right" placeholder=" " disabled></el-input>
             </el-form-item>
             <!-- <el-form-item label="IP地址:" >
                 <el-input v-model="formInline.ip" placeholder=" " disabled></el-input>
@@ -77,11 +77,10 @@ export default {
     // }
     return {
       formInline: {
-        account: 'admin',
-        company: 'xxx',
-        telnum: '131200000000',
-        privilegeLevel: '普通用户',
-        password: 'adminroot'
+        account: '',
+        company: '',
+        telnum: '',
+        right: ''
       },
       ruleForm: {
         oldPass: '',
@@ -89,6 +88,7 @@ export default {
         checkPass: ''
       },
       oldPassCheck: false,
+      theFirstGet: true,
       rules: {
         // oldPass: [{validator: checkoldpass, trigger: 'blur'}],
         pass: [{ validator: checkpassword, trigger: 'blur' }],
@@ -110,12 +110,12 @@ export default {
         console.log(this.formInline)
         this.$message({
           type: 'success',
-          message: '添加成功!'
+          message: '保存成功!'
         })
       }).catch(() => {
         this.$message({
           type: 'info',
-          message: '取消添加'
+          message: '取消保存'
         })
       })
     },
@@ -130,17 +130,32 @@ export default {
       this.$refs[formdate].validate((valid) => {
         if (valid) {
           // getDate
-          this.dialogVisible = false
-          this.formInline.password = this.ruleForm.password
+          this.$axios.get('/api/modify_password', this.ruleForm)
+            .then(response => {
+              console.log(response)
+              if (!response.data.success) {
+                this.oldPassCheck = true
+                return
+              }
+              this.dialogVisible = false
+            })
+            .catch(function (error) {
+              console.log(error)
+            })
         } else {
-          this.oldPassCheck = true
           return false
         }
       })
     },
     getDate () {
-      // getDate
-      console.log('get')
+      this.$axios.get('/api/personal_info')
+        .then(response => {
+          this.formInline = response.data
+          this.theFirstGet = false
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
     }
   }
 }
