@@ -52,7 +52,7 @@
 <script>
 export default {
   name: 'EditInformation',
-  props: ['date', 'id'],
+  props: ['date'],
   data () {
     return {
       formInline: {
@@ -77,11 +77,11 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        this.$emit('save_edit', this.formInline, this.id)
         this.$message({
           type: 'success',
           message: '保存成功!'
         })
+        this.$emit('save_edit')
         this.$store.commit('FixMainJudge')
         this.$store.commit('FixEditJudge')
       }).catch(() => {

@@ -41,10 +41,10 @@ export default {
         if (valid) {
           this.tempLoading = this.$loading({target: document.querySelector('.el-form')})
           this.$axios.post('/api/check_account', this.user).then(res => {
-            // this.$store.commit('InitializationLoginLevel', res.data.right)
             console.log(res)
             localStorage.setItem('Authorization', res.headers.authorization)
             localStorage.setItem('loginLevel', res.data.right)
+            localStorage.setItem('Identity', res.data.identity)
             if (localStorage.getItem('loginLevel') === 'superRoot' || localStorage.getItem('loginLevel') === 'Root') {
               this.$router.replace({
                 path: '/admin'

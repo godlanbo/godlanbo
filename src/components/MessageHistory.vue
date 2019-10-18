@@ -2,7 +2,7 @@
   <div class="MessageHistory">
       <el-form :inline="true" :model="formInline" ref="search" hide-required-asterisk>
         <el-form-item label="发送对象" prop="MessageTo" :rules="[{required: true, message: '不能为空', trigger: 'blur'}]">
-          <el-input v-model="formInline.MessageTo" placeholder="商户联系电话"></el-input>
+          <el-input v-model="formInline.MessageTo" placeholder="查找号码"></el-input>
         </el-form-item>
         <el-form-item label="发送时间" label-width="100px">
           <el-col :span="11">
@@ -14,17 +14,10 @@
           </el-col>
         </el-form-item>
         <el-form-item >
-          <el-col :push="12"><el-button type="primary" @click="searchInfo('search')">查看</el-button></el-col>
+          <el-button type="primary" @click="searchInfo('search')">查看</el-button>
         </el-form-item>
       </el-form>
-      <!-- <el-button @click="deleteSelectInfo">
-        <i class="el-icon-finished">批量删除</i>
-      </el-button> -->
-      <el-table  :data="tableData"  height="610" stripe v-loading="theFirstGet">
-        <!-- <el-table-column
-          type="selection"
-          width="55">
-        </el-table-column> -->
+      <el-table  :data="tableData"  height="650" stripe v-loading="theFirstGet">
         <el-table-column prop="MessageTo" label="发送对象"></el-table-column>
         <el-table-column prop="sendTime" label="发送时间"></el-table-column>
         <el-table-column prop="MessageInfo" label="详细信息">
@@ -38,9 +31,7 @@
               title="消息内容:"
               :visible.sync="dialogVisible"
               width="30%">
-              <!-- <el-button @click="test(scope.$index, scope.row)">test</el-button> -->
               <el-divider></el-divider>
-              <!-- <p>{{ tableData[scope.$index].MessageInfo }}</p> -->
               <p>{{ dialogText }}</p>
               <span slot="footer" class="dialog-footer">
                 <el-button type="primary" @click="dialogVisible = false">确定</el-button>
@@ -48,11 +39,6 @@
             </el-dialog>
           </div>
         </el-table-column>
-        <!-- <el-table-column label="操作" width="403">
-          <div slot-scope="scope">
-            <el-button type="danger" size="mini" @click="deleteHistoryInfo(scope.$index, scope.row)">删除</el-button>
-          </div>
-        </el-table-column> -->
       </el-table>
       <div class="block">
         <el-pagination
@@ -157,30 +143,31 @@ export default {
       this.getDate(val)
     },
     getDate (pagenumber) {
-      let loading = this.$loading({target: document.querySelector('.el-table')})
-      this.$axios.post('/api/get_store_info', {pageNumber: pagenumber, searchState: this.$store.state.searchState})
-        .then(response => {
-          console.log(response)
-          // this.tableData = response.data.info
-          // this.totalInfoNum = response.data.totalInfoNum
-          loading.close()
-        })
-        .catch(function (error) {
-          console.log(error)
-          loading.close()
-        })
+      // let loading = this.$loading({target: document.querySelector('.el-table')})
+      // this.$axios.post('/api/get_store_info', {pageNumber: pagenumber, searchState: this.$store.state.searchState})
+      //   .then(response => {
+      //     console.log(response)
+      //     // this.tableData = response.data.info
+      //     // this.totalInfoNum = response.data.totalInfoNum
+      //     loading.close()
+      //   })
+      //   .catch(function (error) {
+      //     console.log(error)
+      //     loading.close()
+      //   })
     },
     getFirstInfo (pagenumber) {
-      this.$axios.post('/api/get_store_info', {pageNumber: pagenumber, searchState: this.$store.state.searchState})
-        .then(response => {
-          console.log(response)
-          // this.tableData = response.data.info
-          // this.totalInfoNum = response.data.totalInfoNum
-          // this.theFirstGet = false
-        })
-        .catch(function (error) {
-          console.log(error)
-        })
+      // this.$axios.post('/api/get_store_info', {pageNumber: pagenumber, searchState: this.$store.state.searchState})
+      //   .then(response => {
+      //     console.log(response)
+      //     // this.tableData = response.data.info
+      //     // this.totalInfoNum = response.data.totalInfoNum
+      //     this.theFirstGet = false
+      //   })
+      //   .catch(function (error) {
+      //     console.log(error)
+      //   })
+      this.theFirstGet = false
     }
   },
   created () {
@@ -223,20 +210,26 @@ export default {
 [class*=" el-icon-"], [class^=el-icon-]{
   font-weight: bold;
 }
-</style>
-<style>
-body{
-  margin: 0px;
-}
 .el-form{
   padding: 10px 20px 10px 20px;
 }
 .el-table {
   margin: 0px auto;
+  margin-bottom: 10px;
   padding: 0px auto 20px auto;
 }
+.MessageHistory>>>button.el-button.el-button--primary{
+  margin-left: 10px;
+}
+</style>
+<style>
+body{
+  margin: 0px;
+}
+
 .el-main{
   margin-top: 10px;
   padding-top: 0px;
+  padding-bottom: 0px;
 }
 </style>

@@ -1,25 +1,25 @@
 <template>
   <div class="InformationManagement">
     <div v-if="$store.state.MainJudge">
-      <el-form  :model="formInline" :rules="rules" ref="search" :inline="true" hide-required-asterisk>
+      <el-form  :model="formInline" :rules="rules" ref="search" :inline="true" hide-required-asterisk label-width="70px">
         <el-form-item label="关键字" prop="keyword">
           <el-input v-model="formInline.keyword" placeholder="相关信息"></el-input>
         </el-form-item>
-        <el-form-item label="信息来源" label-width="100px" prop="infofrom">
+        <el-form-item label="信息来源"  prop="infofrom">
           <el-select v-model="formInline.infofrom" placeholder="请选择">
             <el-option label="自动抓取" value="自动抓取"></el-option>
             <el-option label="手动生成" value="手动生成"></el-option>
             <el-option label="全部" value="all"></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="渠道" label-width="100px" prop="path">
+        <el-form-item label="渠道"  prop="path">
           <el-select v-model="formInline.path" placeholder="请选择">
             <el-option label="美团" value="美团"></el-option>
             <el-option label="大众点评" value="大众点评"></el-option>
             <el-option label="全部" value="all"></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="更新时间" label-width="100px">
+        <el-form-item label="更新时间" >
           <el-col :span="11">
             <el-date-picker type="date" placeholder="选择日期" v-model="formInline.date1" style="width: 100%;"></el-date-picker>
           </el-col>
@@ -32,7 +32,12 @@
         <el-button type="primary" @click="submitSearch('search')">查询</el-button>
         <el-button @click="addInformation">新增</el-button>
         <el-button @click="outPutInfo">导出</el-button>
-        <el-button type="primary" @click="sendMessage" v-if="$store.state.loginLevel == 'superRoot'">群发短信</el-button>
+        <div class="superRoot" v-if="$store.state.loginLevel == 'superRoot'">
+          <el-button @click="sendMessageBox">群发短信</el-button>
+          <el-input class="dialog_input" v-model="inputTemplateCode" placeholder="填写模板code"></el-input>
+          <el-button @click="addTemplateCode" style="margin-left: 10px;" type="primary" class="add_template_button">添加模板</el-button>
+          <a href="https://signin.aliyun.com/login.htm" target="_blank"><el-button type="primary" style="margin-left: 10px;">获得code</el-button></a>
+        </div>
       </el-form-item>
     </el-form>
 
@@ -97,28 +102,32 @@
         </el-pagination>
       </div>
       <el-dialog
-            title="短信内容:"
+            title="选择模板:"
             :visible.sync="dialogVisible"
-            width="30%">
+            width="50%">
             <el-divider></el-divider>
-            <el-input
-              type="textarea"
-              :rows="7"
-              placeholder="请输入内容"
-              resize="none"
-              v-model="textarea">
-            </el-input>
-
+            <el-table class="dialog_table" :data="templateData" stripe height="400">
+              <el-table-column
+               label="Select"
+               width="140">
+                 <template slot-scope="scope">
+                   <el-radio v-model="checked" :label="scope.row.templateCode">&nbsp;</el-radio>
+                 </template>
+               </el-table-column>
+              <el-table-column prop="templateName" label="模板名称"></el-table-column>
+              <el-table-column prop="templateCode" label="模板code"></el-table-column>
+              <el-table-column prop="templateStatus" label="模板状态"></el-table-column>
+            </el-table>
             <span slot="footer" class="dialog-footer">
-              <el-button type="primary" @click="sendMessageAlert">发送</el-button>
+              <el-button type="primary" class="submit_message" @click="sendMessage">确认发送</el-button>
             </span>
         </el-dialog>
     </div>
     <div v-else-if="$store.state.EditJudge">
-      <EditInformation @save_edit="updateform" :date="tableData[tableDateRowIndex]" :id="tableDateRowIndex"></EditInformation>
+      <EditInformation @save_edit="updateform" :date="tableData[tableDateRowIndex]"></EditInformation>
     </div>
     <div v-else-if="$store.state.AddJudge">
-      <AddInformation @save_add="addInformationToform"></AddInformation>
+      <AddInformation @save_add="updateform"></AddInformation>
     </div>
   </div>
 </template>
@@ -136,7 +145,7 @@ export default {
       tableDateRowIndex: 0,
       dialogVisible: false,
       totalInfoNum: 10,
-      textarea: '',
+      inputTemplateCode: '',
       formInline: {
         keyword: '',
         infofrom: '',
@@ -144,6 +153,21 @@ export default {
         date1: '',
         date2: ''
       },
+      checked: null,
+      templateData: [{
+        templateName: '123',
+        templateCode: '123',
+        templateStatus: '1'
+      }, {
+        templateName: '123',
+        templateCode: '5',
+        templateStatus: '1'
+      }],
+      // {
+      //   templateName: '',
+      //   templateCode: '',
+      //   templateStatus: ''
+      // }
       resetPage: 1,
       rules: {
         keyword: [{required: true, message: '不能为空', trigger: 'blur'}],
@@ -156,27 +180,37 @@ export default {
     }
   },
   methods: {
-    getDateTime () {
-      var d = new Date()
-      var year = d.getFullYear()
-      var month = d.getMonth() + 1
-      var day = d.getDate()
-      var hour = d.getHours()
-      var minutes = d.getMinutes()
-      var sec = d.getSeconds()
-      if (minutes < 10) {
-        minutes = '0' + minutes
+    sendMessage () {
+      if (this.checked === null) {
+        this.$alert('请先选中模板', '注意', '确定')
+        return
       }
-      if (sec < 10) {
-        sec = '0' + sec
-      }
-      if (month < 10) {
-        month = '0' + month
-      }
-      if (day < 10) {
-        day = '0' + day
-      }
-      return year + '-' + month + '-' + day + ' ' + hour + ':' + minutes + ':' + sec
+      this.$confirm('是否使用选中模板向用户发送信息?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        this.$axios.post('/api/sendMessage', this.checked)
+          .then(response => {
+            // this.tableData = response.data.info
+            this.$message({
+              type: 'success',
+              message: '发送成功!'
+            })
+          })
+          .catch(function (error) {
+            this.$message({
+              type: 'error',
+              message: '发送失败!'
+            })
+            console.log(error)
+          })
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消发送'
+        })
+      })
     },
     outPutInfo () {
       if (this.multipleSelection.length === 0) {
@@ -221,20 +255,39 @@ export default {
         }
       })
     },
+    addTemplateCode () {
+      let loading = this.$loading({target: document.querySelector('.add_template_button')})
+      this.$axios.post('/api/addTemplateCode', this.templateCode)
+        .then(response => {
+          if (response.data.xxx) {
+            this.$message({
+              type: 'success',
+              message: '添加成功!'
+            })
+          } else {
+            this.$message({
+              type: 'info',
+              message: '添加失败'
+            })
+          }
+          loading.close()
+        })
+        .catch(function (error) {
+          this.$message({
+            type: 'error',
+            message: '添加失败'
+          })
+          loading.close()
+          console.log(error)
+        })
+    },
     handleCurrentPage (val) {
-      console.log(this.resetPage)
       this.getDate(val)
     },
-    updateform (obj, index) {
-      obj.time = this.getDateTime()
-      // this.tableData[index] = obj
-    },
-    addInformationToform (obj) {
-      obj.time = this.getDateTime()
-      // this.tableData[this.tableData.length] = obj
+    updateform () {
+      this.getDate(this.resetPage)
     },
     handleEdit (index, row) {
-      console.log(row)
       this.tableDateRowIndex = index
       this.$store.commit('FixMainJudge')
       this.$store.commit('FixEditJudge')
@@ -264,25 +317,26 @@ export default {
     handleSelectionChange (val) {
       this.multipleSelection = val
     },
-    sendMessage () {
-      if (this.multipleSelection.length === 0) {
-        this.$alert('请勾选商户后再点击群发短信！', '注意', '确定')
-      } else {
-        this.dialogVisible = true
-      }
+    sendMessageBox () {
+      // if (this.multipleSelection.length === 0) {
+      //   this.$alert('请勾选商户后再点击群发短信！', '注意', '确定')
+      // } else {
+      //   this.dialogVisible = true
+      // }
+      this.dialogVisible = true
     },
-    sendMessageAlert () {
-      this.$axios.post('/api/get_store_info', this.multipleSelection)
-        .then(response => {
-          console.log(response)
-          // this.tableData = response.data.info
-        })
-        .catch(function (error) {
-          console.log(error)
-        })
-      this.$alert('已选中' + this.multipleSelection.length + '个商户进行短信群发', '发送成功', '成功')
-      this.dialogVisible = false
-    },
+    // sendMessageAlert () {
+    //   this.$axios.post('/api/get_store_info', this.multipleSelection)
+    //     .then(response => {
+    //       console.log(response)
+    //       // this.tableData = response.data.info
+    //     })
+    //     .catch(function (error) {
+    //       console.log(error)
+    //     })
+    //   this.$alert('已选中' + this.multipleSelection.length + '个商户进行短信群发', '发送成功', '成功')
+    //   this.dialogVisible = false
+    // },
     getDate (pagenumber) {
       let loading = this.$loading({target: document.querySelector('.el-table')})
       this.$axios.post('/api/get_store_info', {pageNumber: pagenumber, searchState: this.$store.state.searchState})
@@ -318,7 +372,7 @@ export default {
     // getDate 在页面加载前获取数据
     this.$store.commit('InitializationLoginLevel', localStorage.getItem('loginLevel'))
     this.$store.commit('ResetSearchState')
-    this.getTheFristInfo(1)
+    // this.getTheFristInfo(1)
     this.$store.commit('InitializationMainJudge')
     this.$store.commit('InitializationEditJudge')
     this.$store.commit('InitializationAddJudge')
@@ -343,30 +397,54 @@ export default {
   margin-bottom: 30px;
   background-color: #3a4f80;
 }
-.el-textarea>>>.el-textarea__inner{
-  width: 80%;
-  margin-left: auto;
-  margin-right: auto;
+.dialog_input>>>.el-input__inner{
+  width: 20%;
+  margin-left: 10px;
 }
-.el-textarea{
-  margin-bottom: 10px;
+.InformationManagement>>>.el-dialog__body{
+  height: 400px;
 }
-
-</style>
-<style>
-body{
-  margin: 0px;
+.dialog_input{
+  display: inline;
 }
-.el-form{
-  padding: 0px 20px 0px 20px;
+.el-dialog>>>button.el-button.el-button--primary{
+  margin-left: 10px;
 }
 .el-table {
   margin: 0px auto;
+  margin-bottom: 10px;
   padding: 0px auto 20px auto;
+}
+.el-form{
+  padding: 10px 20px 10px 20px;
+  width: 100%;
+  float:left;
+}
+.el-select>>>.el-input__inner{
+  width: 95%;
+}
+.superRoot{
+  display: inline;
+  margin-left: 10px;
+}
+.el-divider--horizontal{
+  margin-bottom: 0px;
+}
+.el-cascader-node>.el-radio, .el-radio:last-child{
+  margin-left: 10px;
+}
+</style>
+<style>
+.el-select__caret.el-input__icon.el-icon-arrow-up{
+  margin-right: 20px;
+}
+body{
+  margin: 0px;
 }
 .el-main{
   margin-top: 10px;
   padding-top: 0px;
+  padding-bottom: 0px;
 }
 
 </style>

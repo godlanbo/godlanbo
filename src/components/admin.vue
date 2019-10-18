@@ -17,7 +17,7 @@
             <el-menu-item index="/admin/MessageHistory" @click="toSomeRouter('MessageHistory')">短信群发历史</el-menu-item>
             <el-submenu index="users">
               <template slot="title">
-                  <span>用户</span>
+                <span>用户</span>
               </template>
               <el-menu-item index="/admin/AllUsersInfo" @click="toSomeRouter('AllUsersInfo')">所有用户</el-menu-item>
               <el-menu-item index="/admin/AddUser" @click="toSomeRouter('AddUser')">添加用户</el-menu-item>
@@ -67,6 +67,7 @@ export default {
       }).then(() => {
         localStorage.setItem('Authorization', null)
         localStorage.setItem('loginLevel', null)
+        localStorage.setItem('Identity', null)
         this.$message({
           type: 'success',
           message: '退出登录!'
@@ -81,11 +82,6 @@ export default {
     }
   },
   mounted () {
-    // this.$set(this.data, 'bodyHeight', `${document.documentElement.clientHeight}`)
-    // window.onresize = function temp() {
-    //   this.bodyHeight = `${document.documentElement.clientHeight}`
-    //   console.log(this.bodyHeight)
-    // }
     this.bodyHeight = document.documentElement.clientHeight
     window.onresize = () => {
       this.bodyHeight = `${document.documentElement.clientHeight}`
@@ -163,5 +159,10 @@ body{
 }
 .cell {
   text-align: center;
+}
+.el-main{
+  margin-top: 10px;
+  padding-top: 0px;
+  padding-bottom: 0px;
 }
 </style>

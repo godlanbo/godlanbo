@@ -28,6 +28,7 @@ axios.interceptors.request.use(
     return config
   },
   err => {
+    console.log(-1)
     return Promise.reject(err)
   })
 // 响应拦截器
@@ -36,6 +37,8 @@ axios.interceptors.response.use(
     if (response.headers.code === 10010 || response.headers.code === 10011) {
       alert('登录超时')
       localStorage.setItem('Authorization', null)
+      localStorage.setItem('loginLevel', null)
+      localStorage.setItem('Identity', null)
       router.replace({
         path: '/Login'
       })
@@ -44,9 +47,13 @@ axios.interceptors.response.use(
   },
   error => {
     if (error.response.status === 401) {
-      alert('Unauthorized access')
+      router.replace({
+        path: '/Error401'
+      })
     } else if (error.response.status === 500) {
-      alert('服务器出错')
+      router.replace({
+        path: '/Error500'
+      })
     }
     return Promise.reject(error.response.data)
   })

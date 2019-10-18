@@ -26,7 +26,7 @@
         <el-col :push="12"><el-button type="primary" @click="searchInfo('search')">查询</el-button></el-col>
       </el-form-item>
     </el-form>
-    <el-table :data="tableData"  height="610" stripe v-loading="theFirstGet">
+    <el-table :data="tableData"  height="650" stripe v-loading="theFirstGet">
      <el-table-column prop="MessageTo" label="发送对象" width="335"></el-table-column>
      <el-table-column prop="sendTime" label="发送时间" width="335"></el-table-column>
      <el-table-column prop="sendNow" label="发送状态" width="335"></el-table-column>
@@ -138,7 +138,7 @@ export default {
           console.log(response)
           // this.tableData = response.data.info
           // this.totalInfoNum = response.data.totalInfoNum
-          // this.theFirstGet = false
+          this.theFirstGet = false
         })
         .catch(function (error) {
           console.log(error)
@@ -212,21 +212,24 @@ export default {
   color: #333;
   line-height: 60px;
 }
-</style>
-<style>
-body{
-  margin: 0px;
-}
 .el-form{
   padding: 10px 20px 10px 20px;
 }
 .el-table {
   margin: 0px auto;
+  margin-bottom: 10px;
   padding: 0px auto 20px auto;
 }
+</style>
+<style>
+body{
+  margin: 0px;
+}
+
 .el-main{
   margin-top: 10px;
   padding-top: 0px;
+  padding-bottom: 0px;
 }
 /*.el-header {
   background-color:  #808080;

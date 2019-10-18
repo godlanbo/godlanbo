@@ -21,7 +21,7 @@
       <el-button @click="recoverySelectInfo">
         <i class="el-icon-finished">批量恢复</i>
       </el-button>
-      <el-table ref="multipleTable" :data="tableInfo"  height="610" stripe @selection-change="handleSelectionChange" v-loading="theFirstGet">
+      <el-table ref="multipleTable" :data="tableInfo"  height="620" stripe @selection-change="handleSelectionChange" v-loading="theFirstGet">
         <el-table-column
           type="selection"
           width="55">
@@ -233,17 +233,13 @@ export default {
 [class*=" el-icon-"], [class^=el-icon-]{
   font-weight: bold;
 }
+.el-table{
+  margin-bottom: 10px;
+}
+.el-form{
+  padding: 10px 20px 10px 20px;
+  height: 55px;
+}
 </style>
 <style>
-/*.el-header {
-  background-color:  #808080;
-  color: #333;
-  line-height: 60px;
-}*/
-/*.el-aside {
-  background-color: rgb(238, 241, 246);
-  text-align: center;
-  line-height: 60px;
-  height: 800px;
-}*/
 </style>

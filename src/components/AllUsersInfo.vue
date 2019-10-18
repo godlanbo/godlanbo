@@ -99,6 +99,12 @@ export default {
       this.searchInfo()
     }
   },
+  mounted () {
+    history.pushState(null, null, document.URL)
+    window.addEventListener('popstate', function () {
+      history.pushState(null, null, document.URL)
+    })
+  },
   methods: {
     switchPage () {
       this.AllUsersInfo = !this.AllUsersInfo
@@ -173,6 +179,10 @@ export default {
           })
           .catch(function (error) {
             console.log(error)
+            this.$message({
+              type: 'error',
+              message: '删除失败'
+            })
           })
       }).catch(() => {
         this.$message({
@@ -200,10 +210,14 @@ export default {
             })
             .catch(function (error) {
               console.log(error)
+              this.$message({
+                type: 'info',
+                message: '变更失败'
+              })
             })
         }).catch(() => {
           this.$message({
-            type: 'info',
+            type: 'error',
             message: '已取消变更'
           })
         })
@@ -233,6 +247,10 @@ export default {
           })
           .catch(function (error) {
             console.log(error)
+            this.$message({
+              type: 'error',
+              message: '删除失败'
+            })
           })
       }).catch(() => {
         this.$message({
@@ -264,6 +282,9 @@ el-header {
 }
 .el-input{
   width: 15%;
+}
+.el-table{
+  margin-bottom: 10px;
 }
 </style>
 <style>

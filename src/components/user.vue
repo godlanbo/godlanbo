@@ -63,6 +63,7 @@ export default {
       }).then(() => {
         localStorage.setItem('Authorization', null)
         localStorage.setItem('loginLevel', null)
+        localStorage.setItem('Identity', null)
         this.$message({
           type: 'success',
           message: '退出登录!'
@@ -77,11 +78,6 @@ export default {
     }
   },
   mounted () {
-    // this.$set(this.data, 'bodyHeight', `${document.documentElement.clientHeight}`)
-    // window.onresize = function temp() {
-    //   this.bodyHeight = `${document.documentElement.clientHeight}`
-    //   console.log(this.bodyHeight)
-    // }
     this.bodyHeight = document.documentElement.clientHeight
     window.onresize = () => {
       this.bodyHeight = `${document.documentElement.clientHeight}`

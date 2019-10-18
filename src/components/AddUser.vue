@@ -1,34 +1,34 @@
 <template>
   <div class="AddUser">
     <span>添加用户</span>
-        <el-divider></el-divider>
-        <el-form :model="formInline" label-width="90px" >
-            <el-form-item label="公司:" >
-                <el-input v-model="formInline.company" placeholder=" " ></el-input>
-            </el-form-item>
-            <el-form-item label="公司电话: " >
-                <el-input v-model="formInline.telnum" placeholder=" " ></el-input>
-            </el-form-item>
-            <el-form-item label="公司负责人:" >
-                <el-input v-model="formInline.companyBoss" placeholder=" " ></el-input>
-            </el-form-item>
-            <el-form-item label="用户等级:" >
-                <el-select v-model="formInline.right" placeholder="请选择" style="width: 93%;">
-                    <el-option label="普通用户" value="1"></el-option>
-                    <el-option label="铜牌用户" value="2"></el-option>
-                    <el-option label="银牌用户" value="3"></el-option>
-                    <el-option label="金牌用户" value="4"></el-option>
-                    <el-option label="管理员" value="5" v-if="$store.state.loginLevel == 'superRoot'"></el-option>
-                </el-select>
-            </el-form-item>
-            <el-form-item label="添加数量:" >
-                <el-input v-model="formInline.userNum" placeholder="1" ></el-input>
-            </el-form-item>
+    <el-divider></el-divider>
+    <el-form :model="formInline" label-width="90px" >
+      <el-form-item label="公司:" >
+        <el-input v-model="formInline.company" placeholder=" " ></el-input>
+      </el-form-item>
+      <el-form-item label="公司电话: " >
+        <el-input v-model="formInline.telnum" placeholder=" " ></el-input>
+      </el-form-item>
+      <el-form-item label="公司负责人:" >
+        <el-input v-model="formInline.companyBoss" placeholder=" " ></el-input>
+      </el-form-item>
+      <el-form-item label="用户等级:" >
+        <el-select v-model="formInline.right" placeholder="请选择" style="width: 93%;">
+          <el-option label="普通用户" value="1"></el-option>
+          <el-option label="铜牌用户" value="2"></el-option>
+          <el-option label="银牌用户" value="3"></el-option>
+          <el-option label="金牌用户" value="4"></el-option>
+          <el-option label="管理员" value="5" v-if="$store.state.loginLevel == 'superRoot'"></el-option>
+        </el-select>
+      </el-form-item>
+      <el-form-item label="添加数量:" >
+        <el-input v-model="formInline.userNum" placeholder="1" ></el-input>
+      </el-form-item>
 
-            <el-form-item>
-                <el-button type="primary" @click="save_add">添加</el-button>
-            </el-form-item>
-        </el-form>
+      <el-form-item>
+        <el-button type="primary" @click="save_add">添加</el-button>
+      </el-form-item>
+    </el-form>
   </div>
 </template>
 <script>
@@ -61,6 +61,10 @@ export default {
           })
           .catch(function (error) {
             console.log(error)
+            this.$message({
+              type: 'error',
+              message: '添加失败'
+            })
           })
       }).catch(() => {
         this.$message({

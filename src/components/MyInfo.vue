@@ -89,13 +89,13 @@ export default {
         right: '',
         ip: ''
       },
-      checkModify: {
-        account: '',
-        company: '',
-        telnum: '',
-        right: '',
-        ip: ''
-      },
+      // checkModify: {
+      //   account: '',
+      //   company: '',
+      //   telnum: '',
+      //   right: '',
+      //   ip: ''
+      // },
       theFirstGet: true,
       oldPassCheck: false,
       ruleForm: {
@@ -113,10 +113,10 @@ export default {
   },
   methods: {
     saveModify () {
-      if (this.checkModify === this.formInline) {
-        this.$alert('没有要保存的修改', '注意', '确定')
-        return
-      }
+      // if (this.checkModify === this.formInline) {
+      //   this.$alert('没有要保存的修改', '注意', '确定')
+      //   return
+      // }
       this.$confirm('是否保存?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
@@ -185,7 +185,7 @@ export default {
   },
   created () {
     this.getDate()
-    this.checkModify = this.formInline
+    // this.checkModify = this.formInline
   }
 }
 </script>
