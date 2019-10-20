@@ -86,7 +86,11 @@ export default {
             })
             this.getDate(this.resetPage)
           })
-          .catch(function (error) {
+          .catch(error => {
+            this.$message({
+              type: 'error',
+              message: '恢复失败'
+            })
             console.log(error)
           })
       }).catch(() => {
@@ -149,7 +153,11 @@ export default {
             })
             this.getDate(this.resetPage)
           })
-          .catch(function (error) {
+          .catch(error => {
+            this.$message({
+              type: 'error',
+              message: '删除失败'
+            })
             console.log(error)
           })
       }).catch(() => {
@@ -180,7 +188,11 @@ export default {
             })
             this.getDate(this.resetPage)
           })
-          .catch(function (error) {
+          .catch(error => {
+            this.$message({
+              type: 'error',
+              message: '删除失败'
+            })
             console.log(error)
           })
       }).catch(() => {
@@ -208,7 +220,11 @@ export default {
             })
             this.getDate(this.resetPage)
           })
-          .catch(function (error) {
+          .catch(error => {
+            this.$message({
+              type: 'error',
+              message: '恢复失败'
+            })
             console.log(error)
           })
       }).catch(() => {

@@ -177,7 +177,7 @@ export default {
               message: '删除成功!'
             })
           })
-          .catch(function (error) {
+          .catch(error => {
             console.log(error)
             this.$message({
               type: 'error',
@@ -208,7 +208,7 @@ export default {
                 message: '操作成功!'
               })
             })
-            .catch(function (error) {
+            .catch(error => {
               console.log(error)
               this.$message({
                 type: 'info',
@@ -245,7 +245,7 @@ export default {
               message: '删除成功!'
             })
           })
-          .catch(function (error) {
+          .catch(error => {
             console.log(error)
             this.$message({
               type: 'error',

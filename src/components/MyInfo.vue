@@ -74,13 +74,6 @@ export default {
         callback()
       }
     }
-    // const checkoldpass = (rule, value, callback) => {
-    //   if (value !== this.formInline.password) {
-    //     callback(new Error('旧密码错误'))
-    //   } else {
-    //     callback()
-    //   }
-    // }
     return {
       formInline: {
         account: '',
@@ -133,7 +126,11 @@ export default {
               message: '保存成功!'
             })
           })
-          .catch(function (error) {
+          .catch(error => {
+            this.$message({
+              type: 'error',
+              message: '保存失败'
+            })
             loading.close()
             console.log(error)
           })

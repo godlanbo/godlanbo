@@ -71,8 +71,12 @@ export default {
             })
             this.$emit('save_edit')
           })
-          .catch(function (error) {
+          .catch(error => {
             console.log(error)
+            this.$message({
+              type: 'error',
+              message: '保存失败！'
+            })
           })
       }).catch(() => {
         this.$message({

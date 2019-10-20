@@ -17,7 +17,7 @@
           <el-button type="primary" @click="searchInfo('search')">查看</el-button>
         </el-form-item>
       </el-form>
-      <el-table  :data="tableData"  height="650" stripe v-loading="theFirstGet">
+      <el-table  :data="tableData"  height="650" v-loading="theFirstGet" stripe>
         <el-table-column prop="MessageTo" label="发送对象"></el-table-column>
         <el-table-column prop="sendTime" label="发送时间"></el-table-column>
         <el-table-column prop="MessageInfo" label="详细信息">
@@ -65,15 +65,7 @@ export default {
       totalInfoNum: 1,
       dialogText: '',
       theFirstGet: true,
-      tableData: [{
-        MessageTo: '1312000000',
-        sendTime: '2019-12-20 10:00:20',
-        MessageInfo: '尊敬的131200000：近期电信诈骗行为频发，请小心防范；如您有积分兑换需求，请自行登录中国移动积分商城官网https://m.jf.10086.cn/兑换；值此国庆佳节之际，内江移动温馨提示您：请提前预存足额话费，避免影响正常通信。如有出国计划，请提前拨打10086开通国长国漫功能。祝您愉快度过国庆长假。【中国移动】'
-      }, {
-        MessageTo: '1312000000',
-        sendTime: '2019-12-20 10:00:20',
-        MessageInfo: '尊敬的客户：近期电信诈骗行为频发，请小心防范；如您有积分兑换需求，请自行登录中国移动积分商城官网https://m.jf.10086.cn/兑换；值此国庆佳节之际，内江移动温馨提示您：请提前预存足额话费，避免影响正常通信。如有出国计划，请提前拨打10086开通国长国漫功能。祝您愉快度过国庆长假。【中国移动】'
-      }],
+      tableData: [],
       dialogVisible: false
     }
   },
@@ -119,14 +111,20 @@ export default {
     searchInfo (formdate) {
       this.$refs[formdate].validate((valid) => {
         if (valid) {
-          this.$axios.post('/api/get_store_info', this.formInline)
+          let loading = this.$loading({target: document.querySelector('.el-table')})
+          this.$axios.post('/api/search_msg', this.formInline)
             .then(response => {
-              console.log(response)
-              // this.tableData = response.data.info
-              // this.totalInfoNum = response.data.totalInfoNum
-              // this.$store.commit('OpenSearchState')
+              this.tableData = response.data.msg_history
+              this.totalInfoNum = response.data.totalInfoNum
+              this.$store.commit('OpenSearchState')
+              loading.close()
             })
-            .catch(function (error) {
+            .catch(error => {
+              this.$message({
+                type: 'error',
+                message: '搜索数据失败'
+              })
+              loading.close()
               console.log(error)
             })
           this.resetPage = 1
@@ -143,36 +141,33 @@ export default {
       this.getDate(val)
     },
     getDate (pagenumber) {
-      // let loading = this.$loading({target: document.querySelector('.el-table')})
-      // this.$axios.post('/api/get_store_info', {pageNumber: pagenumber, searchState: this.$store.state.searchState})
-      //   .then(response => {
-      //     console.log(response)
-      //     // this.tableData = response.data.info
-      //     // this.totalInfoNum = response.data.totalInfoNum
-      //     loading.close()
-      //   })
-      //   .catch(function (error) {
-      //     console.log(error)
-      //     loading.close()
-      //   })
+      let loading = this.$loading({target: document.querySelector('.el-table')})
+      this.$axios.post('/api/get_history_msg', {pageNumber: pagenumber, searchState: this.$store.state.searchState})
+        .then(response => {
+          this.tableData = response.data.msg_history
+          this.totalInfoNum = response.data.totalInfoNum
+          loading.close()
+        })
+        .catch(function (error) {
+          console.log(error)
+          loading.close()
+        })
     },
     getFirstInfo (pagenumber) {
-      // this.$axios.post('/api/get_store_info', {pageNumber: pagenumber, searchState: this.$store.state.searchState})
-      //   .then(response => {
-      //     console.log(response)
-      //     // this.tableData = response.data.info
-      //     // this.totalInfoNum = response.data.totalInfoNum
-      //     this.theFirstGet = false
-      //   })
-      //   .catch(function (error) {
-      //     console.log(error)
-      //   })
-      this.theFirstGet = false
+      this.$axios.post('/api/get_history_msg', {pageNumber: pagenumber, searchState: this.$store.state.searchState})
+        .then(response => {
+          this.tableData = response.data.msg_history
+          this.totalInfoNum = response.data.totalInfoNum
+          this.theFirstGet = false
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
     }
   },
   created () {
     this.$store.commit('ResetSearchState')
-    this.getFirstInfo()
+    this.getFirstInfo(1)
   }
 }
 </script>

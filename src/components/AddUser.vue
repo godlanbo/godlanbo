@@ -59,7 +59,7 @@ export default {
               message: '添加成功!'
             })
           })
-          .catch(function (error) {
+          .catch(error => {
             console.log(error)
             this.$message({
               type: 'error',

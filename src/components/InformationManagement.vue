@@ -103,9 +103,11 @@
       </div>
       <el-dialog
             title="选择模板:"
-            :visible.sync="dialogVisible"
+            :visible.sync="dialogVisibleMessage"
+            class="dialog_message"
             width="50%">
             <el-divider></el-divider>
+            <el-input v-model="signName" placeholder="填写公司签名" class="signName_input"></el-input>
             <el-table class="dialog_table" :data="templateData" stripe height="400">
               <el-table-column
                label="Select"
@@ -117,11 +119,35 @@
               <el-table-column prop="templateName" label="模板名称"></el-table-column>
               <el-table-column prop="templateCode" label="模板code"></el-table-column>
               <el-table-column prop="templateStatus" label="模板状态"></el-table-column>
+              <el-table-column label="操作">
+                <template slot-scope="scope">
+                  <el-button
+                  size="mini"
+                  @click="showTheTemplateInfo(scope.$index, scope.row)">查看</el-button>
+                  <el-button
+                  size="mini"
+                  type="danger"
+                  @click="deleteTheTemplateInfo(scope.$index, scope.row)">删除</el-button>
+                </template>
+              </el-table-column>
             </el-table>
             <span slot="footer" class="dialog-footer">
               <el-button type="primary" class="submit_message" @click="sendMessage">确认发送</el-button>
             </span>
         </el-dialog>
+
+        <el-dialog
+            title="模板内容:"
+            :visible.sync="dialogVisibleShow"
+            class="dialog_showInfo"
+            width="30%">
+            <el-divider></el-divider>
+            <p>{{ dialogText }}</p>
+            <span slot="footer" class="dialog-footer">
+              <el-button type="primary" @click="dialogVisibleShow = false">确认</el-button>
+            </span>
+        </el-dialog>
+
     </div>
     <div v-else-if="$store.state.EditJudge">
       <EditInformation @save_edit="updateform" :date="tableData[tableDateRowIndex]"></EditInformation>
@@ -143,7 +169,9 @@ export default {
   data () {
     return {
       tableDateRowIndex: 0,
-      dialogVisible: false,
+      dialogVisibleMessage: false,
+      dialogVisibleShow: false,
+      dialogText: '',
       totalInfoNum: 10,
       inputTemplateCode: '',
       formInline: {
@@ -153,20 +181,14 @@ export default {
         date1: '',
         date2: ''
       },
+      signName: null,
       checked: null,
-      templateData: [{
-        templateName: '123',
-        templateCode: '123',
-        templateStatus: '1'
-      }, {
-        templateName: '123',
-        templateCode: '5',
-        templateStatus: '1'
-      }],
+      templateData: [],
       // {
       //   templateName: '',
       //   templateCode: '',
-      //   templateStatus: ''
+      //   templateStatus: '',
+      //   temp;ateInfo: ''
       // }
       resetPage: 1,
       rules: {
@@ -180,9 +202,69 @@ export default {
     }
   },
   methods: {
+    showTheTemplateInfo (index, row) {
+      this.dialogVisibleShow = true
+      this.dialogText = row.templateInfo
+    },
+    deleteTheTemplateInfo (index, row) {
+      this.$confirm('是否删除该模板?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        this.$axios.post('/api/delete_template', row)
+          .then(response => {
+            if (response.data.success) {
+              this.$message({
+                type: 'success',
+                message: '删除成功!'
+              })
+            } else {
+              this.$message({
+                type: 'error',
+                message: '删除失败!'
+              })
+            }
+            this.getAllTemplateInfo()
+          })
+          .catch(error => {
+            this.$message({
+              type: 'error',
+              message: '删除失败！'
+            })
+            console.log(error)
+          })
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消删除'
+        })
+      })
+    },
+    getAllTemplateInfo () {
+      let loading = this.$loading({target: document.querySelector('.dialog_table')})
+      this.$axios.get('/api/get_all_template')
+        .then(response => {
+          console.log(response)
+          this.templateData = response.data.all_template
+          loading.close()
+        })
+        .catch(error => {
+          this.$message({
+            type: 'error',
+            message: '拉取数据失败！'
+          })
+          loading.close()
+          console.log(error)
+        })
+    },
     sendMessage () {
       if (this.checked === null) {
         this.$alert('请先选中模板', '注意', '确定')
+        return
+      }
+      if (this.signName === null) {
+        this.$alert('公司签名不能为空', '注意', '确定')
         return
       }
       this.$confirm('是否使用选中模板向用户发送信息?', '提示', {
@@ -190,19 +272,22 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        this.$axios.post('/api/sendMessage', this.checked)
+        let loading = this.$loading({target: document.querySelector('.submit_message')})
+        this.$axios.post('/api/send_message', {templateCode: this.checked, acceptUsers: this.multipleSelection, signName: this.signName})
           .then(response => {
-            // this.tableData = response.data.info
+            this.dialogVisibleMessage = false
             this.$message({
               type: 'success',
               message: '发送成功!'
             })
+            loading.close()
           })
-          .catch(function (error) {
+          .catch(error => {
             this.$message({
               type: 'error',
               message: '发送失败!'
             })
+            loading.close()
             console.log(error)
           })
       }).catch(() => {
@@ -256,23 +341,25 @@ export default {
       })
     },
     addTemplateCode () {
+      console.log(this.inputTemplateCode)
       let loading = this.$loading({target: document.querySelector('.add_template_button')})
-      this.$axios.post('/api/addTemplateCode', this.templateCode)
+      this.$axios.post('/api/add_template', {templateCode: this.inputTemplateCode})
         .then(response => {
-          if (response.data.xxx) {
+          console.log(response)
+          if (response.data.success) {
             this.$message({
               type: 'success',
-              message: '添加成功!'
+              message: '添加成功'
             })
           } else {
             this.$message({
-              type: 'info',
+              type: 'error',
               message: '添加失败'
             })
           }
           loading.close()
         })
-        .catch(function (error) {
+        .catch(error => {
           this.$message({
             type: 'error',
             message: '添加失败'
@@ -318,25 +405,15 @@ export default {
       this.multipleSelection = val
     },
     sendMessageBox () {
-      // if (this.multipleSelection.length === 0) {
-      //   this.$alert('请勾选商户后再点击群发短信！', '注意', '确定')
-      // } else {
-      //   this.dialogVisible = true
-      // }
-      this.dialogVisible = true
+      if (this.multipleSelection.length === 0) {
+        this.$alert('请勾选商户后再点击群发短信！', '注意', '确定').then(() => {}).catch(() => {})
+      } else {
+        this.getAllTemplateInfo()
+        this.signName = null
+        this.checked = null
+        this.dialogVisibleMessage = true
+      }
     },
-    // sendMessageAlert () {
-    //   this.$axios.post('/api/get_store_info', this.multipleSelection)
-    //     .then(response => {
-    //       console.log(response)
-    //       // this.tableData = response.data.info
-    //     })
-    //     .catch(function (error) {
-    //       console.log(error)
-    //     })
-    //   this.$alert('已选中' + this.multipleSelection.length + '个商户进行短信群发', '发送成功', '成功')
-    //   this.dialogVisible = false
-    // },
     getDate (pagenumber) {
       let loading = this.$loading({target: document.querySelector('.el-table')})
       this.$axios.post('/api/get_store_info', {pageNumber: pagenumber, searchState: this.$store.state.searchState})
@@ -359,6 +436,7 @@ export default {
         })
         .catch(function (error) {
           console.log(error)
+          this.theFirstGet = false
         })
     }
   },
@@ -372,7 +450,7 @@ export default {
     // getDate 在页面加载前获取数据
     this.$store.commit('InitializationLoginLevel', localStorage.getItem('loginLevel'))
     this.$store.commit('ResetSearchState')
-    // this.getTheFristInfo(1)
+    this.getTheFristInfo(1)
     this.$store.commit('InitializationMainJudge')
     this.$store.commit('InitializationEditJudge')
     this.$store.commit('InitializationAddJudge')
@@ -401,8 +479,20 @@ export default {
   width: 20%;
   margin-left: 10px;
 }
-.InformationManagement>>>.el-dialog__body{
-  height: 400px;
+.el-dialog__wrapper.dialog_showInfo>>>.el-dialog{
+  margin-top:280px !important;
+}
+.el-dialog__wrapper.dialog_showInfo>>>.el-dialog__body{
+  height: 150px;
+}
+.el-dialog__wrapper.dialog_message>>>.el-dialog__body{
+  height: 460px;
+}
+.el-dialog__wrapper.dialog_showInfo>>>p{
+  text-align: left;
+  margin-left: 15px;
+  margin-right: 15px;
+  font-size: 15px;
 }
 .dialog_input{
   display: inline;
@@ -416,12 +506,17 @@ export default {
   padding: 0px auto 20px auto;
 }
 .el-form{
-  padding: 10px 20px 10px 20px;
+  padding: 10px 10px 10px 10px;
   width: 100%;
   float:left;
 }
 .el-select>>>.el-input__inner{
   width: 95%;
+}
+.signName_input.el-input>>>.el-input__inner{
+  width: 30%;
+  margin-left: 20px;
+  margin-top:15px;
 }
 .superRoot{
   display: inline;
@@ -432,6 +527,9 @@ export default {
 }
 .el-cascader-node>.el-radio, .el-radio:last-child{
   margin-left: 10px;
+}
+.el-dialog__wrapper>>>.el-dialog__footer{
+  padding-bottom: 10px;
 }
 </style>
 <style>
@@ -446,5 +544,4 @@ body{
   padding-top: 0px;
   padding-bottom: 0px;
 }
-
 </style>
