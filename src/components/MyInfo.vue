@@ -16,9 +16,6 @@
                 <el-input v-model="formInline.right" placeholder=" " disabled></el-input>
             </el-form-item>
 
-            <!-- <el-form-item label="密码:" >
-                <el-input v-model="formInline.password" placeholder=" " ></el-input>
-            </el-form-item> -->
             <el-form-item label="IP地址:" >
                 <el-input v-model="formInline.ip" placeholder=" " disabled></el-input>
             </el-form-item>
@@ -82,13 +79,7 @@ export default {
         right: '',
         ip: ''
       },
-      // checkModify: {
-      //   account: '',
-      //   company: '',
-      //   telnum: '',
-      //   right: '',
-      //   ip: ''
-      // },
+      checkModify: '',
       theFirstGet: true,
       oldPassCheck: false,
       ruleForm: {
@@ -106,10 +97,11 @@ export default {
   },
   methods: {
     saveModify () {
-      // if (this.checkModify === this.formInline) {
-      //   this.$alert('没有要保存的修改', '注意', '确定')
-      //   return
-      // }
+      console.log(this.checkModify)
+      if (JSON.stringify(this.formInline) === JSON.stringify(this.checkModify)) {
+        this.$alert('没有要保存的修改', '注意', '确定')
+        return
+      }
       this.$confirm('是否保存?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
@@ -173,6 +165,7 @@ export default {
       this.$axios.get('/api/personal_info')
         .then(response => {
           this.formInline = response.data
+          this.checkModify = JSON.parse(JSON.stringify(this.formInline))
           this.theFirstGet = false
         })
         .catch(function (error) {
@@ -182,7 +175,6 @@ export default {
   },
   created () {
     this.getDate()
-    // this.checkModify = this.formInline
   }
 }
 </script>

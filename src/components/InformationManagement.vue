@@ -384,16 +384,26 @@ export default {
       this.$store.commit('FixAddJudge')
     },
     handleDelete (index, row) {
-      this.$confirm('是否删除该用户信息?', '提示', {
+      this.$confirm('是否删除该商户信息?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        this.tableData.splice(index, 1)
-        this.$message({
-          type: 'success',
-          message: '删除成功!'
-        })
+        this.$axios.post('/api/del_store', row)
+          .then(response => {
+            this.$message({
+              type: 'success',
+              message: '删除成功!'
+            })
+            this.getDate(this.resetPage)
+          })
+          .catch(error => {
+            this.$message({
+              type: 'error',
+              message: '删除失败'
+            })
+            console.log(error)
+          })
       }).catch(() => {
         this.$message({
           type: 'info',
@@ -531,17 +541,24 @@ export default {
 .el-dialog__wrapper>>>.el-dialog__footer{
   padding-bottom: 10px;
 }
+.el-button.add_template_button.el-button--primary.el-loading-parent--relative>>>.el-loading-spinner{
+  top:60%;
+}
 </style>
 <style>
 .el-select__caret.el-input__icon.el-icon-arrow-up{
   margin-right: 20px;
 }
+.el-loading-spinner .circular{
+  height: 30px;
+  width: 30px;
+}
 body{
   margin: 0px;
 }
-.el-main{
+/*.el-main{
   margin-top: 10px;
   padding-top: 0px;
   padding-bottom: 0px;
-}
+}*/
 </style>

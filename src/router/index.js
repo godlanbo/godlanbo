@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import admin from '@/components/admin'
-import Message from '@/components/Message'
+// import Message from '@/components/Message'
 import MessageHistory from '@/components/MessageHistory'
 import InformationManagement from '@/components/InformationManagement'
 import Login from '@/components/Login'
@@ -32,6 +32,10 @@ const routes = [
     path: '/404',
     name: '404',
     component: Error404
+  },
+  {
+    path: '/',
+    redirect: '/Login'
   },
   {
     path: '*',
@@ -76,14 +80,14 @@ const routes = [
       login_required: false
     },
     children: [
-      {
-        path: 'Message',
-        name: 'Message',
-        component: Message,
-        meta: {
-          login_required: false
-        }
-      },
+      // {
+      //   path: 'Message',
+      //   name: 'Message',
+      //   component: Message,
+      //   meta: {
+      //     login_required: false
+      //   }
+      // },
       {
         path: 'MessageHistory',
         name: 'MessageHistory',
@@ -138,7 +142,6 @@ const routes = [
 ]
 const router = new Router({
   mode: 'history',
-  base: process.env.BASE_URL,
   routes
 })
 router.beforeEach((to, from, next) => {

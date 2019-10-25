@@ -15,10 +15,13 @@ export default {
         this.$router.push('/Login')
       }
     }
+    if (window.innerWidth !== 1919 || window.innerHeight !== 903) {
+      this.$alert('窗口大小可能会影响界面的变动，请适当调整浏览器窗口', '注意', '确定')
+    }
+    // window.innerWidth = 1920
+    // window.innerHeight = 412
+    // localStorage.setItem('Identity', 'admin')
   }
-  // components: {
-  //   admin, Message, MessageHistory, InformationManagement, EditInformation
-  // }
 }
 
 </script>
@@ -26,9 +29,9 @@ export default {
 body{
   margin: 0px;
 }
-.el-main{
+.app .el-main{
   margin-top: 10px;
-  padding-top: 0px;
-  padding-bottom: 0px;
+  padding-top: 0px ;
+  padding-bottom: 0px ;
 }
 </style>

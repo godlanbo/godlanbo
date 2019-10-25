@@ -39,12 +39,15 @@
         <el-input v-model="formInline.remark" placeholder=" " :disabled="judgeShowInput"></el-input>
       </el-form-item>
       <el-form-item>
-        <el-button type="button" @click="save_add('addInfoForm')" :disabled="$store.state.automaticGrabState&&formInline.infofrom != '手动生成'">添加</el-button>
+        <el-button type="primary" @click="save_add('addInfoForm')" :disabled="$store.state.automaticGrabState&&formInline.infofrom != '手动生成'">添加</el-button>
         <el-button  @click="cancel" >取消</el-button>
       </el-form-item>
     </el-form>
-    <div class="autoText" v-if="$store.state.automaticGrabState">数据抓取中<i class="el-icon-loading"></i></div>
-    <el-progress :percentage="percentageNum" :format="format" :stroke-width="14" v-if="$store.state.automaticGrabState"></el-progress>
+    <div v-if="$store.state.automaticGrabState">
+      <span class="autoText">数据抓取中<i class="el-icon-loading"></i></span>
+      <el-button type="danger" class="button_stop" size="mini " @click="cancelAutoGetInfo">终止抓取</el-button>
+      <el-progress :percentage="percentageNum" :format="format" :stroke-width="14"></el-progress>
+    </div>
   </div>
 </template>
 <script>
@@ -78,6 +81,10 @@ export default {
     }
   },
   methods: {
+    cancelAutoGetInfo () {
+      // xxx
+      this.$store.commit('InitializationAutomaticGrabState', false)
+    },
     save_add (formdate) {
       if (this.formInline.infofrom === '手动生成') {
         this.$refs[formdate].validate((valid) => {
@@ -185,14 +192,14 @@ export default {
 .el-form>>>.el-form-item__label{
   margin-left: 470px;
 }
-.el-form>>>button.el-button.el-button--button{
-  margin-left: 590px;
+.el-form>>>button.el-button.el-button--primary{
+  margin-left: 550px;
   margin-top:15px;
   padding-right: 50px;
   padding-left: 50px;
 }
 .el-form>>>button.el-button.el-button--default{
-  margin-left: 100px;
+  margin-left: 200px;
   margin-top:15px;
   padding-right: 50px;
   padding-left: 50px;

@@ -62,9 +62,9 @@ export default {
   methods: {
     submitSearch (formdate) {
       // 提交数据到后端查询，接受返回数据
-      let loading = this.$loading({target: document.querySelector('.el-table')})
       this.$refs[formdate].validate((valid) => {
         if (valid) {
+          let loading = this.$loading({target: document.querySelector('.el-table')})
           this.$axios.post('/api/search_store_info', this.formInline)
             .then(response => {
               this.tableData = response.data.info

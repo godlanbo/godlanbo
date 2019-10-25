@@ -6,13 +6,13 @@
                 <h2>商户管理系统</h2>
                 <el-divider></el-divider>
                 <el-form-item label="账号:" prop="account">
-                    <el-input v-model="user.account" placeholder=" " ></el-input>
+                    <el-input v-model="user.account" placeholder=" "  @keyup.enter.native="login('user')"></el-input>
                 </el-form-item>
                 <el-form-item label="密码:" prop="password">
-                    <el-input v-model="user.password" placeholder=" " type="password"></el-input>
+                    <el-input v-model="user.password" placeholder=" " @keyup.enter.native="login('user')" type="password"></el-input>
                 </el-form-item>
                 <el-form-item>
-                    <el-button type="primary" @click="login('user')" clss="login_button">登录</el-button>
+                    <el-button type="primary" @click="login('user')"  class="login_button">登录</el-button>
                 </el-form-item>
             </el-form>
         </el-main>
@@ -41,7 +41,14 @@ export default {
         if (valid) {
           this.tempLoading = this.$loading({target: document.querySelector('.el-form')})
           this.$axios.post('/api/check_account', this.user).then(res => {
-            console.log(res)
+            if (!res.data.success) {
+              this.$message({
+                type: 'error',
+                message: res.data.error_message
+              })
+              this.tempLoading.close()
+              return
+            }
             localStorage.setItem('Authorization', res.headers.authorization)
             localStorage.setItem('loginLevel', res.data.right)
             localStorage.setItem('Identity', res.data.identity)
@@ -49,13 +56,18 @@ export default {
               this.$router.replace({
                 path: '/admin'
               })
+              this.tempLoading.close()
             } else {
               this.$router.replace({
                 path: '/user'
               })
+              this.tempLoading.close()
             }
           }).catch(err => {
-            alert('登陆失败')
+            this.$message({
+              type: 'error',
+              message: '登陆失败'
+            })
             console.log(err)
             this.tempLoading.close()
           })

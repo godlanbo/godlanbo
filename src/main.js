@@ -34,6 +34,7 @@ axios.interceptors.request.use(
 // 响应拦截器
 axios.interceptors.response.use(
   response => {
+    console.log(response)
     if (response.headers.code === 10010 || response.headers.code === 10011) {
       alert('登录超时')
       localStorage.setItem('Authorization', null)
@@ -47,21 +48,19 @@ axios.interceptors.response.use(
   },
   error => {
     if (error.response.status === 401) {
-      // router.replace({
-      //   path: '/Error401'
-      // })
-      alert('401')
+      router.replace({
+        path: '/401'
+      })
     } else if (error.response.status === 500) {
-      // router.replace({
-      //   path: '/Error500'
-      // })
-      alert('500')
+      router.replace({
+        path: '/500'
+      })
     }
     return Promise.reject(error.response.data)
   })
 
 /* eslint-disable no-new */
-
+Vue.config.devtools = true
 new Vue({
   el: '#app',
   router,
