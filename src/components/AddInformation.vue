@@ -16,9 +16,9 @@
       <el-form-item label=" 链接: " prop="web_link">
         <el-input v-model="formInline.web_link" placeholder=" " :disabled="judgeShowInput"></el-input>
       </el-form-item>
-      <el-form-item label="联系人:" prop="adminName">
+      <!-- <el-form-item label="联系人:" prop="adminName">
         <el-input v-model="formInline.adminName" placeholder=" " :disabled="judgeShowInput"></el-input>
-      </el-form-item>
+      </el-form-item> -->
       <el-form-item label="电话:" prop="phone_number">
         <el-input v-model="formInline.phone_number" placeholder=" " :disabled="judgeShowInput"></el-input>
       </el-form-item>
@@ -60,7 +60,6 @@ export default {
         score: '',
         store_address: '',
         web_link: '',
-        adminName: '',
         comment_num: '0',
         phone_number: '',
         infofrom: '手动生成',
@@ -73,7 +72,6 @@ export default {
         score: [{required: true, message: '此项不能为空'}],
         store_address: [{required: true, message: '此项不能为空'}],
         web_link: [{required: true, message: '此项不能为空'}],
-        adminName: [{required: true, message: '此项不能为空'}],
         phone_number: [{required: true, message: '此项不能为空'}],
         web: [{required: true, message: '此项不能为空'}]
       },

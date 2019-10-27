@@ -168,7 +168,8 @@ export default {
           this.checkModify = JSON.parse(JSON.stringify(this.formInline))
           this.theFirstGet = false
         })
-        .catch(function (error) {
+        .catch(error => {
+          this.theFirstGet = false
           console.log(error)
         })
     }

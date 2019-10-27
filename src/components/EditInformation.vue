@@ -15,9 +15,9 @@
             <el-form-item label=" 链接: " >
                 <el-input v-model="formInline.web_link" placeholder=" " ></el-input>
             </el-form-item>
-            <el-form-item label="联系人:" >
+            <!-- <el-form-item label="联系人:" >
                 <el-input v-model="formInline.adminName" placeholder=" " ></el-input>
-            </el-form-item>
+            </el-form-item> -->
             <el-form-item label="电话:" >
                 <el-input v-model="formInline.phone_number" placeholder=" " ></el-input>
             </el-form-item>
@@ -60,7 +60,6 @@ export default {
         score: this.date.score,
         store_address: this.date.store_address,
         web_link: this.date.web_link,
-        adminName: this.date.adminName,
         phone_number: this.date.phone_number,
         infofrom: this.date.infofrom,
         web: this.date.web,

@@ -160,7 +160,8 @@ export default {
           this.totalInfoNum = response.data.totalInfoNum
           this.theFirstGet = false
         })
-        .catch(function (error) {
+        .catch(error => {
+          this.theFirstGet = false
           console.log(error)
         })
     }

@@ -65,8 +65,8 @@
           </template>
 
         </el-table-column>
-        <el-table-column prop="adminName" label="联系人">
-        </el-table-column>
+       <!--  <el-table-column prop="adminName" label="联系人">
+        </el-table-column> -->
         <el-table-column prop="phone_number" label="电话">
         </el-table-column>
         <el-table-column prop="infofrom" label="信息来源">
@@ -176,8 +176,8 @@ export default {
       inputTemplateCode: '',
       formInline: {
         keyword: '',
-        infofrom: '',
-        path: '',
+        infofrom: '全部',
+        path: '全部',
         date1: '',
         date2: ''
       },
@@ -192,7 +192,7 @@ export default {
       // }
       resetPage: 1,
       rules: {
-        keyword: [{required: true, message: '不能为空', trigger: 'blur'}],
+        // keyword: [{required: true, message: '不能为空', trigger: 'blur'}],
         infofrom: [{required: true, message: '不能为空', trigger: 'blur'}],
         path: [{required: true, message: '不能为空', trigger: 'blur'}]
       },
@@ -437,14 +437,14 @@ export default {
           loading.close()
         })
     },
-    getTheFristInfo (pagenumber) {
+    getTheFirstInfo (pagenumber) {
       this.$axios.post('/api/get_store_info', {pageNumber: pagenumber, searchState: this.$store.state.searchState})
         .then(response => {
           this.tableData = response.data.info
           this.totalInfoNum = response.data.totalInfoNum
           this.theFirstGet = false
         })
-        .catch(function (error) {
+        .catch(error => {
           console.log(error)
           this.theFirstGet = false
         })
@@ -460,7 +460,7 @@ export default {
     // getDate 在页面加载前获取数据
     this.$store.commit('InitializationLoginLevel', localStorage.getItem('loginLevel'))
     this.$store.commit('ResetSearchState')
-    this.getTheFristInfo(1)
+    this.getTheFirstInfo(1)
     this.$store.commit('InitializationMainJudge')
     this.$store.commit('InitializationEditJudge')
     this.$store.commit('InitializationAddJudge')

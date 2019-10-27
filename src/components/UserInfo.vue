@@ -153,7 +153,8 @@ export default {
           this.formInline = response.data
           this.theFirstGet = false
         })
-        .catch(function (error) {
+        .catch(error => {
+          this.theFirstGet = false
           console.log(error)
         })
     }

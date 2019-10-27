@@ -126,7 +126,8 @@ export default {
           this.tableData = response.data.info
           this.totalInfoNum = response.data.totalInfoNum
         })
-        .catch(function (error) {
+        .catch(error => {
+          this.theFirstGet = false
           console.log(error)
         })
     }

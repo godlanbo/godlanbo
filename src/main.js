@@ -9,7 +9,10 @@ import Qs from 'qs'
 import store from './vuex/store'
 import 'element-ui/lib/theme-chalk/index.css'
 axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded'
+axios.defaults.headers.post['Access-Control-Allow-Origin'] = '*'
+axios.defaults.headers.post['Access-Control-Allow-Credentials'] = 'true'
 axios.defaults.withCredentials = true
+axios.defaults.timeout = 30000
 Vue.prototype.$axios = axios
 Vue.prototype.qs = Qs
 Vue.prototype.HOME = '/api'
@@ -19,11 +22,8 @@ Vue.config.productionTip = false
 // 请求拦截器
 axios.interceptors.request.use(
   config => {
-    // console.log(config)
     if (localStorage.getItem('Authorization') !== null || localStorage.getItem('Authorization') !== undefined) {
       config.headers.Authorization = localStorage.getItem('Authorization')
-      // config.headers('Access-Control-Allow-Origin:*')
-      // config.headers('Access-Control-Allow-Credentials:true')
     }
     return config
   },
@@ -60,7 +60,7 @@ axios.interceptors.response.use(
   })
 
 /* eslint-disable no-new */
-Vue.config.devtools = true
+// Vue.config.devtools = true
 new Vue({
   el: '#app',
   router,
