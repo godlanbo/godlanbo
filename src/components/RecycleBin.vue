@@ -21,7 +21,7 @@
       <el-button @click="recoverySelectInfo">
         <i class="el-icon-finished">批量恢复</i>
       </el-button>
-      <el-table ref="multipleTable" :data="tableInfo"  height="620" stripe @selection-change="handleSelectionChange" v-loading="theFirstGet">
+      <el-table ref="multipleTable" :data="tableInfo"  :height="tableHeight" stripe @selection-change="handleSelectionChange" v-loading="theFirstGet">
         <el-table-column
           type="selection"
           width="55">
@@ -55,6 +55,7 @@ export default {
   name: 'RecycleBin',
   data () {
     return {
+      tableHeight: document.getElementsByClassName('el-main')[0].clientHeight - 175,
       totalInfoNum: 1,
       formTable: {
         keyword: '',
@@ -70,6 +71,11 @@ export default {
     // 请求数据
     this.$store.commit('ResetSearchState')
     this.getFirstDate(1)
+  },
+  mounted () {
+    window.onresize = () => {
+      this.tableHeight = document.documentElement.clientHeight - 296
+    }
   },
   methods: {
     RecoveryInfo (index, row) {

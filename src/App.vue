@@ -15,7 +15,6 @@ export default {
         this.$router.push('/Login')
       }
     }
-    console.log(this.$route.path)
     if (window.innerWidth !== 1919 || window.innerHeight !== 903) {
       this.$alert('窗口大小可能会影响界面的变动，请适当调整浏览器窗口', '注意', '确定')
     }
@@ -34,6 +33,7 @@ export default {
 <style type="text/css">
 body{
   margin: 0px;
+  min-width: 1000px;
 }
 .app .el-main{
   margin-top: 10px;

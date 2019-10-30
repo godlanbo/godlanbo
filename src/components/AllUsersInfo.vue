@@ -27,7 +27,7 @@
     </el-dropdown>
     <el-input v-model="searchKeyWord" placeholder="用户相关信息"></el-input>
     <el-button type="primary" @click="searchInfo">查询</el-button>
-    <el-table ref="multipleTable" :data="usersDate"  height="580" @selection-change="handleSelectionChange" stripe v-loading="theFirstGet">
+    <el-table ref="multipleTable" :data="usersDate"  :height="tableHeight" @selection-change="handleSelectionChange" stripe v-loading="theFirstGet">
       <el-table-column
           type="selection"
           width="55">
@@ -77,6 +77,7 @@ export default {
   },
   data () {
     return {
+      tableHeight: document.getElementsByClassName('el-main')[0].clientHeight - 210,
       AllUsersInfo: true,
       EditUserInfo: false,
       usersDateRowIndex: 0,
@@ -100,6 +101,9 @@ export default {
     }
   },
   mounted () {
+    window.onresize = () => {
+      this.tableHeight = document.documentElement.clientHeight - 296
+    }
     history.pushState(null, null, document.URL)
     window.addEventListener('popstate', function () {
       history.pushState(null, null, document.URL)
@@ -143,6 +147,7 @@ export default {
         .then(response => {
           this.usersDate = response.data.user_info
           this.$store.commit('OpenSearchState')
+          this.totalInfoNum = response.data.totalInfoNum
           loading.close()
           this.resetPage = 1
         })

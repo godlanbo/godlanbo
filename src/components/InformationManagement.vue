@@ -28,16 +28,19 @@
             <el-date-picker type="date" placeholder="选择日期" v-model="formInline.date2" style="width: 100%;"></el-date-picker>
           </el-col>
         </el-form-item>
-      <el-form-item>
+      <el-form-item class="button_box">
+
         <el-button type="primary" @click="submitSearch('search')">查询</el-button>
         <el-button @click="addInformation">新增</el-button>
         <el-button @click="outPutInfo">导出</el-button>
-        <div class="superRoot" v-if="$store.state.loginLevel == 'superRoot'">
-          <el-button @click="sendMessageBox">群发短信</el-button>
-          <el-input class="dialog_input" v-model="inputTemplateCode" placeholder="填写模板code"></el-input>
-          <el-button @click="addTemplateCode" style="margin-left: 10px;" type="primary" class="add_template_button">添加模板</el-button>
-          <a href="https://signin.aliyun.com/login.htm" target="_blank"><el-button type="primary" style="margin-left: 10px;">获得code</el-button></a>
-        </div>
+        <!-- <div class="superRoot" v-if="$store.state.loginLevel == 'superRoot'"> -->
+        <el-button @click="sendMessageBox" v-if="$store.state.loginLevel == 'superRoot'">群发短信</el-button>
+         <input class="dialog_input" v-model="inputTemplateCode" placeholder="填写模板code" v-if="$store.state.loginLevel == 'superRoot'">
+          <!-- <el-input class="dialog_input" v-model="inputTemplateCode" placeholder="填写模板code"></el-input> -->
+        <el-button @click="addTemplateCode" style="margin-left: 10px;" type="primary" class="add_template_button" v-if="$store.state.loginLevel == 'superRoot'">添加模板</el-button>
+        <a href="https://signin.aliyun.com/login.htm" target="_blank" v-if="$store.state.loginLevel == 'superRoot'"><el-button type="primary" style="margin-left: 10px;">获得code</el-button></a>
+        <!-- </div> -->
+
       </el-form-item>
     </el-form>
 
@@ -45,7 +48,7 @@
         id="out-table"
         ref="multipleTable"
         :data="tableData"
-        height="590"
+        :height="tableHeight"
         @selection-change="handleSelectionChange"
         stripe
         v-loading="theFirstGet">
@@ -77,7 +80,7 @@
         </el-table-column>
         <el-table-column prop="remark" label="备注">
         </el-table-column>
-        <el-table-column prop="time" label="更新时间">
+        <el-table-column prop="crawl_time" label="更新时间">
         </el-table-column>
         <el-table-column  label="操作">
           <template slot-scope="scope">
@@ -168,6 +171,7 @@ export default {
   },
   data () {
     return {
+      tableHeight: document.getElementsByClassName('el-main')[0].clientHeight - 196,
       tableDateRowIndex: 0,
       dialogVisibleMessage: false,
       dialogVisibleShow: false,
@@ -176,8 +180,8 @@ export default {
       inputTemplateCode: '',
       formInline: {
         keyword: '',
-        infofrom: '全部',
-        path: '全部',
+        infofrom: 'all',
+        path: 'all',
         date1: '',
         date2: ''
       },
@@ -201,6 +205,11 @@ export default {
       theFirstGet: true
     }
   },
+  // computed: {
+  //   tableHeight: function () {
+  //     return document.getElementsByClassName('el-main')[0].clientHeight - 196
+  //   }
+  // },
   methods: {
     showTheTemplateInfo (index, row) {
       this.dialogVisibleShow = true
@@ -245,7 +254,6 @@ export default {
       let loading = this.$loading({target: document.querySelector('.dialog_table')})
       this.$axios.get('/api/get_all_template')
         .then(response => {
-          console.log(response)
           this.templateData = response.data.all_template
           loading.close()
         })
@@ -328,6 +336,7 @@ export default {
             .then(response => {
               this.$store.commit('OpenSearchState')
               this.tableData = response.data.info
+              this.totalInfoNum = response.data.totalInfoNum
               loading.close()
             })
             .catch(function (error) {
@@ -341,11 +350,9 @@ export default {
       })
     },
     addTemplateCode () {
-      console.log(this.inputTemplateCode)
       let loading = this.$loading({target: document.querySelector('.add_template_button')})
       this.$axios.post('/api/add_template', {templateCode: this.inputTemplateCode})
         .then(response => {
-          console.log(response)
           if (response.data.success) {
             this.$message({
               type: 'success',
@@ -451,6 +458,9 @@ export default {
     }
   },
   mounted () {
+    window.onresize = () => {
+      this.tableHeight = document.documentElement.clientHeight - 300
+    }
     history.pushState(null, null, document.URL)
     window.addEventListener('popstate', function () {
       history.pushState(null, null, document.URL)
@@ -485,10 +495,10 @@ export default {
   margin-bottom: 30px;
   background-color: #3a4f80;
 }
-.dialog_input>>>.el-input__inner{
+/*.dialog_input>>>.el-input__inner{
   width: 20%;
   margin-left: 10px;
-}
+}*/
 .el-dialog__wrapper.dialog_showInfo>>>.el-dialog{
   margin-top:280px !important;
 }
@@ -504,16 +514,15 @@ export default {
   margin-right: 15px;
   font-size: 15px;
 }
-.dialog_input{
+/*.dialog_input{
   display: inline;
-}
+}*/
 .el-dialog>>>button.el-button.el-button--primary{
   margin-left: 10px;
 }
 .el-table {
   margin: 0px auto;
   margin-bottom: 10px;
-  padding: 0px auto 20px auto;
 }
 .el-form{
   padding: 10px 10px 10px 10px;
@@ -528,10 +537,10 @@ export default {
   margin-left: 20px;
   margin-top:15px;
 }
-.superRoot{
+/*.superRoot{
   display: inline;
   margin-left: 10px;
-}
+}*/
 .el-divider--horizontal{
   margin-bottom: 0px;
 }
@@ -546,6 +555,25 @@ export default {
 }
 </style>
 <style>
+.dialog_input{
+  width: 20%;
+  margin-left:10px;
+  background-color: #FFF;
+  border-radius: 4px;
+  border: 1px solid #DCDFE6;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  color: #606266;
+  font-size: inherit;
+  height: 40px;
+  line-height: 40px;
+  outline: 0;
+  padding: 0 15px;
+}
+.button_box{
+  display: flex;
+  justify-content: space-between;
+}
 .el-select__caret.el-input__icon.el-icon-arrow-up{
   margin-right: 20px;
 }
@@ -556,9 +584,4 @@ export default {
 body{
   margin: 0px;
 }
-/*.el-main{
-  margin-top: 10px;
-  padding-top: 0px;
-  padding-bottom: 0px;
-}*/
 </style>

@@ -12,7 +12,7 @@ axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded
 axios.defaults.headers.post['Access-Control-Allow-Origin'] = '*'
 axios.defaults.headers.post['Access-Control-Allow-Credentials'] = 'true'
 axios.defaults.withCredentials = true
-axios.defaults.timeout = 30000
+axios.defaults.timeout = 8000
 Vue.prototype.$axios = axios
 Vue.prototype.qs = Qs
 Vue.prototype.HOME = '/api'
@@ -34,7 +34,6 @@ axios.interceptors.request.use(
 // 响应拦截器
 axios.interceptors.response.use(
   response => {
-    console.log(response)
     if (response.headers.code === 10010 || response.headers.code === 10011) {
       alert('登录超时')
       localStorage.setItem('Authorization', null)

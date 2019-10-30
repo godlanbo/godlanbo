@@ -17,7 +17,7 @@
           <el-button type="primary" @click="searchInfo('search')">查看</el-button>
         </el-form-item>
       </el-form>
-      <el-table  :data="tableData"  height="650" v-loading="theFirstGet" stripe>
+      <el-table  :data="tableData"  :height="tableHeight" v-loading="theFirstGet" stripe>
         <el-table-column prop="MessageTo" label="发送对象"></el-table-column>
         <el-table-column prop="sendTime" label="发送时间"></el-table-column>
         <el-table-column prop="MessageInfo" label="详细信息">
@@ -56,6 +56,7 @@ export default {
   name: 'MessageHistory',
   data () {
     return {
+      tableHeight: document.getElementsByClassName('el-main')[0].clientHeight - 140,
       formInline: {
         MessageTo: '',
         date1: '',
@@ -67,6 +68,11 @@ export default {
       theFirstGet: true,
       tableData: [],
       dialogVisible: false
+    }
+  },
+  mounted () {
+    window.onresize = () => {
+      this.tableHeight = document.documentElement.clientHeight - 296
     }
   },
   methods: {
@@ -223,9 +229,9 @@ body{
   margin: 0px;
 }
 
-.el-main{
+/*.el-main{
   margin-top: 10px;
   padding-top: 0px;
   padding-bottom: 0px;
-}
+}*/
 </style>

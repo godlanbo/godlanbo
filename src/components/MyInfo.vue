@@ -19,7 +19,7 @@
             <el-form-item label="IP地址:" >
                 <el-input v-model="formInline.ip" placeholder=" " disabled></el-input>
             </el-form-item>
-            <el-form-item>
+            <el-form-item label=":">
                 <el-button type="primary" @click="saveModify">保存修改</el-button>
                 <el-button type="default" @click="modifyPass('ruleForm')">修改密码</el-button>
             </el-form-item>
@@ -189,7 +189,7 @@ export default {
   font-weight: bold;
 }
 .formInfo>>>.el-form-item__label{
-  margin-left: 470px;
+  margin-left: 30%;
 }
 .ruleForm>>>.el-form-item__label{
   margin-left: 0px;
@@ -225,7 +225,7 @@ export default {
   margin-left: 35px;
 }
 .formInfo>>>button.el-button.el-button--primary{
-  margin-left: 550px;
+  /*margin-left: 550px;*/
   margin-top:15px;
   padding-right: 50px;
   padding-left: 50px;
@@ -240,6 +240,20 @@ export default {
   margin: 12px auto 30px auto;
   background-color: #3a4f80;
 }
+/*@media (max-width: 1000px){
+  .formInfo>>>.el-form-item__label{
+    margin-left: 7%;
+  }
+}*/
+@media (max-width: 1300px){
+  .formInfo>>>.el-form-item__label{
+    margin-left: 12%;
+  }
+}
 </style>
 <style>
+
+div:nth-child(6) > label{
+  color: white;
+}
 </style>
