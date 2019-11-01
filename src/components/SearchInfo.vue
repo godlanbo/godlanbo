@@ -68,6 +68,11 @@ export default {
           let loading = this.$loading({target: document.querySelector('.el-table')})
           this.$axios.post('/api/search_store_info', this.formInline)
             .then(response => {
+              if (!response.data.success) {
+                this.$alert('查询次数已用完！', '注意', '确定').then(() => {}).catch(() => {})
+                loading.close()
+                return
+              }
               this.tableData = response.data.info
               loading.close()
               this.$store.commit('OpenSearchState')
@@ -92,6 +97,10 @@ export default {
           if (!response) {
             return
           }
+          if (!response.data.success) {
+            this.$alert('导出次数已用完！', '注意', '确定').then(() => {}).catch(() => {})
+            return
+          }
           let url = window.URL.createObjectURL(new Blob([response.data]))
           let link = document.createElement('a')
           link.style.display = 'none'
@@ -100,7 +109,11 @@ export default {
           document.body.appendChild(link)
           link.click()
         })
-        .catch(function (error) {
+        .catch(error => {
+          this.$message({
+            type: 'error',
+            message: '导出失败!'
+          })
           console.log(error)
         })
     },
@@ -110,9 +123,10 @@ export default {
     },
     getDate (pagenumber) {
       let loading = this.$loading({target: document.querySelector('.el-table')})
-      this.$axios.post('/api/search_store_info', this.formInline)
+      this.$axios.post('/api/get_store_info', {pageNumber: pagenumber, searchState: this.$store.state.searchState})
         .then(response => {
           this.tableData = response.data.info
+          this.totalInfoNum = response.data.totalInfoNum
           loading.close()
         })
         .catch(function (error) {

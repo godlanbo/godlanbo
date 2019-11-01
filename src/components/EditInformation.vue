@@ -2,11 +2,11 @@
     <div class="EditInformation">
         <span>编辑商户信息</span>
         <el-divider></el-divider>
-        <el-form :model="formInline" label-width="80px">
+        <el-form :model="formInline" label-width="80px" :rules="rules">
             <el-form-item label="商户名称:" >
                 <el-input v-model="formInline.store_name" placeholder=" " ></el-input>
             </el-form-item>
-            <el-form-item label="质量评级:" >
+            <el-form-item label="质量评级:" prop="score">
                 <el-input v-model="formInline.score" placeholder=" " ></el-input>
             </el-form-item>
             <el-form-item label=" 地址: " >
@@ -36,8 +36,8 @@
                     <el-option label="全部" value="全部"></el-option>
                 </el-select>
             </el-form-item>
-            <el-form-item label="评论数:" >
-                <el-input v-model="formInline.commen_num" placeholder=" " ></el-input>
+            <el-form-item label="评论数:" prop="comment_num">
+                <el-input v-model="formInline.comment_num" placeholder=" " ></el-input>
             </el-form-item>
             <el-form-item label="备注:" >
                 <el-input v-model="formInline.remark" placeholder=" " ></el-input>
@@ -54,6 +54,26 @@ export default {
   name: 'EditInformation',
   props: ['date'],
   data () {
+    var checkStoreScore = (rule, value, callback) => {
+      if (value === '') {
+        callback(new Error('此项不能为空'))
+      } else if (isNaN(value)) {
+        callback(new Error('请输入数字值'))
+      } else if (parseFloat(value) > 5 || parseFloat(value) < 0) {
+        callback(new Error('输入范围在1~5之间'))
+      } else {
+        callback()
+      }
+    }
+    var checkCommentCount = (rule, value, callback) => {
+      if (value === '') {
+        callback(new Error('此项不能为空'))
+      } else if (isNaN(value)) {
+        callback(new Error('请输入数字值'))
+      } else {
+        callback()
+      }
+    }
     return {
       formInline: {
         store_name: this.date.store_name,
@@ -64,8 +84,12 @@ export default {
         infofrom: this.date.infofrom,
         web: this.date.web,
         remark: this.date.remark,
-        commen_count: this.date.commen_num,
+        comment_num: this.date.comment_num,
         time: this.date.time
+      },
+      rules: {
+        score: [{validator: checkStoreScore}],
+        comment_num: [{validator: checkCommentCount}]
       }
     }
   },
@@ -76,19 +100,52 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        this.$message({
-          type: 'success',
-          message: '保存成功!'
-        })
-        this.$emit('save_edit')
-        this.$store.commit('FixMainJudge')
-        this.$store.commit('FixEditJudge')
+        this.formInline.time = this.getDateTime()
+        this.$axios.post('/api/save_edit', this.formInline)
+          .then(response => {
+            this.$message({
+              type: 'success',
+              message: '保存成功!'
+            })
+            this.$store.commit('FixMainJudge')
+            this.$store.commit('FixEditJudge')
+            this.$emit('save_edit')
+          })
+          .catch(error => {
+            this.$message({
+              type: 'error',
+              message: '保存失败!'
+            })
+            console.log(error)
+          })
       }).catch(() => {
         this.$message({
           type: 'info',
           message: '取消保存'
         })
       })
+    },
+    getDateTime () {
+      var d = new Date()
+      var year = d.getFullYear()
+      var month = d.getMonth() + 1
+      var day = d.getDate()
+      var hour = d.getHours()
+      var minutes = d.getMinutes()
+      var sec = d.getSeconds()
+      if (minutes < 10) {
+        minutes = '0' + minutes
+      }
+      if (sec < 10) {
+        sec = '0' + sec
+      }
+      if (month < 10) {
+        month = '0' + month
+      }
+      if (day < 10) {
+        day = '0' + day
+      }
+      return year + '-' + month + '-' + day + ' ' + hour + ':' + minutes + ':' + sec
     },
     cancel () {
       this.$store.commit('FixMainJudge')

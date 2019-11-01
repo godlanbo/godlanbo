@@ -1,6 +1,6 @@
 <template>
   <div class="InformationManagement">
-    <div v-if="$store.state.MainJudge">
+    <div v-show="$store.state.MainJudge">
       <el-form  :model="formInline" :rules="rules" ref="search" :inline="true" hide-required-asterisk label-width="70px">
         <el-form-item label="关键字" prop="keyword">
           <el-input v-model="formInline.keyword" @keyup.enter.native="submitSearch('search')" placeholder="相关信息"></el-input>
@@ -152,7 +152,7 @@
         </el-dialog>
 
     </div>
-    <div v-else-if="$store.state.EditJudge">
+    <div v-if="$store.state.EditJudge">
       <EditInformation @save_edit="updateform" :date="tableData[tableDateRowIndex]"></EditInformation>
     </div>
     <div v-else-if="$store.state.AddJudge">

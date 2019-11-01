@@ -54,6 +54,17 @@
 export default {
   name: 'EditInformation',
   data () {
+    var checkStoreScore = (rule, value, callback) => {
+      if (value === '') {
+        callback(new Error('此项不能为空'))
+      } else if (isNaN(value)) {
+        callback(new Error('请输入数字值'))
+      } else if (parseFloat(value) > 5 || parseFloat(value) < 0) {
+        callback(new Error('输入范围在1~5之间'))
+      } else {
+        callback()
+      }
+    }
     return {
       formInline: {
         store_name: '',
@@ -69,7 +80,7 @@ export default {
       },
       rules: {
         store_name: [{required: true, message: '此项不能为空'}],
-        score: [{required: true, message: '此项不能为空'}],
+        score: [{validator: checkStoreScore}],
         store_address: [{required: true, message: '此项不能为空'}],
         web_link: [{required: true, message: '此项不能为空'}],
         phone_number: [{required: true, message: '此项不能为空'}],

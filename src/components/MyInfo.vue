@@ -146,7 +146,6 @@ export default {
           // getDate
           this.$axios.post('/api/modify_password', this.ruleForm)
             .then(response => {
-              console.log(response)
               if (!response.data.success) {
                 this.oldPassCheck = true
                 return
