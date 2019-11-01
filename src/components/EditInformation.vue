@@ -42,8 +42,8 @@
             <el-form-item label="备注:" >
                 <el-input v-model="formInline.remark" placeholder=" " ></el-input>
             </el-form-item>
-            <el-form-item>
-                <el-button type="button" @click="save_edit">保存</el-button>
+            <el-form-item label=":" class="the_end_formline">
+                <el-button type="primary" @click="save_edit">保存</el-button>
                 <el-button  @click="cancel">取消</el-button>
             </el-form-item>
         </el-form>
@@ -107,16 +107,16 @@ export default {
   font-weight: bold;
 }
 .el-form>>>.el-form-item__label{
-  margin-left: 470px;
+  margin-left: 30%;
 }
-.el-form>>>button.el-button.el-button--button{
-  margin-left: 590px;
+.el-form>>>button.el-button.el-button--primary{
+  /*margin-left: 590px;*/
   margin-top:15px;
   padding-right: 50px;
   padding-left: 50px;
 }
 .el-form>>>button.el-button.el-button--default{
-  margin-left: 100px;
+  margin-left: 200px;
   margin-top:15px;
   padding-right: 50px;
   padding-left: 50px;
@@ -124,6 +124,14 @@ export default {
 .el-divider{
   margin: 12px auto 30px auto;
   background-color: #3a4f80;
+}
+.el-form-item.the_end_formline >>> .el-form-item__label{
+  color: white;
+}
+@media (max-width: 1300px){
+  .el-form>>>.el-form-item__label{
+    margin-left: 12%;
+  }
 }
 </style>
 <style>

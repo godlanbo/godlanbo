@@ -25,7 +25,7 @@
         <el-input v-model="formInline.userNum" placeholder="1" ></el-input>
       </el-form-item>
 
-      <el-form-item>
+      <el-form-item label=":" class="the_end_formline">
         <el-button type="primary" @click="save_add">添加</el-button>
       </el-form-item>
     </el-form>
@@ -89,7 +89,7 @@ export default {
   width: 210%;
 }
 .el-form>>>.el-form-item__label{
-  margin-left: 470px;
+  margin-left: 30%;
 }
 /*.el-form>>>button.el-button.el-button--button{
   margin-left: 590px;
@@ -98,7 +98,7 @@ export default {
   padding-left: 50px;
 }*/
 .el-form>>>button.el-button.el-button--primary{
-  margin-left: 895px;
+  margin-left: 335px;
   margin-top:15px;
   padding-right: 50px;
   padding-left: 50px;
@@ -106,6 +106,14 @@ export default {
 .el-divider{
   margin: 12px auto 30px auto;
   background-color: #3a4f80;
+}
+@media (max-width: 1300px){
+  .el-form>>>.el-form-item__label{
+    margin-left: 10%;
+  }
+}
+.el-form-item.the_end_formline >>> .el-form-item__label{
+  color: white;
 }
 </style>
 <style>

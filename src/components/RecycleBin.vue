@@ -2,7 +2,7 @@
   <div class="RecycleBin">
       <el-form :inline="true" :model="formTable">
         <el-form-item label="关键字">
-          <el-input v-model="formTable.keyword" placeholder="商户地址或电话"></el-input>
+          <el-input v-model="formTable.keyword" @keyup.enter.native="searchInfo" placeholder="商户地址或电话"></el-input>
         </el-form-item>
         <el-form-item label="时间范围" label-width="100px">
         <el-select v-model="formTable.timeFrame" placeholder="请选择">
@@ -55,7 +55,7 @@ export default {
   name: 'RecycleBin',
   data () {
     return {
-      tableHeight: document.getElementsByClassName('el-main')[0].clientHeight - 175,
+      tableHeight: document.documentElement.clientHeight - 286,
       totalInfoNum: 1,
       formTable: {
         keyword: '',
@@ -74,7 +74,7 @@ export default {
   },
   mounted () {
     window.onresize = () => {
-      this.tableHeight = document.documentElement.clientHeight - 296
+      this.tableHeight = document.documentElement.clientHeight - 286
     }
   },
   methods: {

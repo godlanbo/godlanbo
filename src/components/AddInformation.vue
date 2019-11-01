@@ -38,7 +38,7 @@
       <el-form-item label="备注:" >
         <el-input v-model="formInline.remark" placeholder=" " :disabled="judgeShowInput"></el-input>
       </el-form-item>
-      <el-form-item>
+      <el-form-item label=":" class="the_end_formline">
         <el-button type="primary" @click="save_add('addInfoForm')" :disabled="$store.state.automaticGrabState&&formInline.infofrom != '手动生成'">添加</el-button>
         <el-button  @click="cancel" >取消</el-button>
       </el-form-item>
@@ -188,10 +188,9 @@ export default {
   font-weight: bold;
 }
 .el-form>>>.el-form-item__label{
-  margin-left: 470px;
+  margin-left: 30%;
 }
 .el-form>>>button.el-button.el-button--primary{
-  margin-left: 550px;
   margin-top:15px;
   padding-right: 50px;
   padding-left: 50px;
@@ -209,6 +208,18 @@ export default {
 .AddInformation>>>.el-progress-bar{
   width: 32%;
   margin-left: 33%;
+}
+.el-select>>>.el-select__caret.el-input__icon.el-icon-arrow-up{
+  margin-right: -450px;
+  /*margin-left: 100px;*/
+}
+.el-form-item.the_end_formline >>> .el-form-item__label{
+  color: white;
+}
+@media (max-width: 1300px){
+  .el-form>>>.el-form-item__label{
+    margin-left: 12%;
+  }
 }
 </style>
 <style>

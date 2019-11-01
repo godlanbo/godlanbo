@@ -3,7 +3,7 @@
     <div v-if="$store.state.MainJudge">
       <el-form  :model="formInline" :rules="rules" ref="search" :inline="true" hide-required-asterisk label-width="70px">
         <el-form-item label="关键字" prop="keyword">
-          <el-input v-model="formInline.keyword" placeholder="相关信息"></el-input>
+          <el-input v-model="formInline.keyword" @keyup.enter.native="submitSearch('search')" placeholder="相关信息"></el-input>
         </el-form-item>
         <el-form-item label="信息来源"  prop="infofrom">
           <el-select v-model="formInline.infofrom" placeholder="请选择">
@@ -108,13 +108,13 @@
             title="选择模板:"
             :visible.sync="dialogVisibleMessage"
             class="dialog_message"
-            width="50%">
+            width="50%"
+            @opened="beforeOpen">
             <el-divider></el-divider>
             <el-input v-model="signName" placeholder="填写公司签名" class="signName_input"></el-input>
             <el-table class="dialog_table" :data="templateData" stripe height="400">
               <el-table-column
-               label="Select"
-               width="140">
+               label="Select">
                  <template slot-scope="scope">
                    <el-radio v-model="checked" :label="scope.row.templateCode">&nbsp;</el-radio>
                  </template>
@@ -171,7 +171,7 @@ export default {
   },
   data () {
     return {
-      tableHeight: document.getElementsByClassName('el-main')[0].clientHeight - 196,
+      tableHeight: document.documentElement.clientHeight - 310,
       tableDateRowIndex: 0,
       dialogVisibleMessage: false,
       dialogVisibleShow: false,
@@ -188,11 +188,12 @@ export default {
       signName: null,
       checked: null,
       templateData: [],
+      templateLoading: null,
       // {
       //   templateName: '',
       //   templateCode: '',
       //   templateStatus: '',
-      //   temp;ateInfo: ''
+      //   tempateInfo: ''
       // }
       resetPage: 1,
       rules: {
@@ -205,16 +206,19 @@ export default {
       theFirstGet: true
     }
   },
-  // computed: {
-  //   tableHeight: function () {
-  //     return document.getElementsByClassName('el-main')[0].clientHeight - 196
-  //   }
-  // },
   methods: {
+    beforeOpen () {
+      // console.log(document.querySelector('.dialog_table'))
+      this.templateLoading = this.$loading({target: document.querySelector('.dialog_table')})
+      // 获取所有模板信息
+      this.getAllTemplateInfo()
+    },
+    // 显示模板对应的内容
     showTheTemplateInfo (index, row) {
       this.dialogVisibleShow = true
-      this.dialogText = row.templateInfo
+      this.dialogText = row.templateContent
     },
+    // 删除模板信息
     deleteTheTemplateInfo (index, row) {
       this.$confirm('是否删除该模板?', '提示', {
         confirmButtonText: '确定',
@@ -250,22 +254,24 @@ export default {
         })
       })
     },
+    // 获得所有模板信息
     getAllTemplateInfo () {
-      let loading = this.$loading({target: document.querySelector('.dialog_table')})
+      // let loading = this.$loading({target: document.querySelector('.dialog_table')})
       this.$axios.get('/api/get_all_template')
         .then(response => {
           this.templateData = response.data.all_template
-          loading.close()
+          this.templateLoading.close()
         })
         .catch(error => {
           this.$message({
             type: 'error',
             message: '拉取数据失败！'
           })
-          loading.close()
+          this.templateLoading.close()
           console.log(error)
         })
     },
+    // 短信群发
     sendMessage () {
       if (this.checked === null) {
         this.$alert('请先选中模板', '注意', '确定')
@@ -305,6 +311,7 @@ export default {
         })
       })
     },
+    // 导出商户信息
     outPutInfo () {
       if (this.multipleSelection.length === 0) {
         this.$alert('请勾选商户后再导出！', '注意', '确定')
@@ -315,18 +322,24 @@ export default {
           if (!response) {
             return
           }
+          // 创建一个下载链接
           let url = window.URL.createObjectURL(new Blob([response.data]))
+          // 创建一个 a 标签元素
           let link = document.createElement('a')
           link.style.display = 'none'
+          // 将此链接绑定到 a 标签元素上
           link.href = url
           link.setAttribute('download', 'excel.csv')
+          // 添加链接标签到body上
           document.body.appendChild(link)
+          // 直接触发下载
           link.click()
         })
         .catch(function (error) {
           console.log(error)
         })
     },
+    // 搜索信息
     submitSearch (formdate) {
       // 提交数据到后端查询，接受返回数据
       this.$refs[formdate].validate((valid) => {
@@ -334,6 +347,7 @@ export default {
           let loading = this.$loading({target: document.querySelector('.el-table')})
           this.$axios.post('/api/search_store_info', this.formInline)
             .then(response => {
+              // 将搜索状态设置为开，此后后端返回数据从搜索状态分出来的数据中给出
               this.$store.commit('OpenSearchState')
               this.tableData = response.data.info
               this.totalInfoNum = response.data.totalInfoNum
@@ -349,6 +363,7 @@ export default {
         }
       })
     },
+    // 添加短信模板
     addTemplateCode () {
       let loading = this.$loading({target: document.querySelector('.add_template_button')})
       this.$axios.post('/api/add_template', {templateCode: this.inputTemplateCode})
@@ -375,21 +390,26 @@ export default {
           console.log(error)
         })
     },
+    // 翻页，根据传入的页数参数重新获得相关页的数据
     handleCurrentPage (val) {
       this.getDate(val)
     },
+    // 更新主页面的信息
     updateform () {
       this.getDate(this.resetPage)
     },
+    // 切换编辑商户信息的页面
     handleEdit (index, row) {
       this.tableDateRowIndex = index
       this.$store.commit('FixMainJudge')
       this.$store.commit('FixEditJudge')
     },
+    // 切换添加商户信息的页面
     addInformation () {
       this.$store.commit('FixMainJudge')
       this.$store.commit('FixAddJudge')
     },
+    // 单个删除商户信息
     handleDelete (index, row) {
       this.$confirm('是否删除该商户信息?', '提示', {
         confirmButtonText: '确定',
@@ -418,59 +438,81 @@ export default {
         })
       })
     },
+    // 将数组指向为所选的对象数组
     handleSelectionChange (val) {
       this.multipleSelection = val
     },
+    // 控制弹出的模板选择窗口
     sendMessageBox () {
       if (this.multipleSelection.length === 0) {
         this.$alert('请勾选商户后再点击群发短信！', '注意', '确定').then(() => {}).catch(() => {})
       } else {
-        this.getAllTemplateInfo()
+        // 重置签名
         this.signName = null
+        // 重置模板的选择
         this.checked = null
+        // 弹窗显示设置为true
         this.dialogVisibleMessage = true
       }
     },
+    // 获取数据函数，参数为获取页数
     getDate (pagenumber) {
       let loading = this.$loading({target: document.querySelector('.el-table')})
       this.$axios.post('/api/get_store_info', {pageNumber: pagenumber, searchState: this.$store.state.searchState})
         .then(response => {
           this.tableData = response.data.info
+          // 更新总页数
           this.totalInfoNum = response.data.totalInfoNum
           loading.close()
         })
-        .catch(function (error) {
+        .catch(error => {
+          this.$message({
+            type: 'error',
+            message: '拉取数据失败'
+          })
           console.log(error)
           loading.close()
         })
     },
+    // 初始化数据函数，特殊的loading控制，以防止在dom树渲染以前因为组件未加载出现全屏loading现象
     getTheFirstInfo (pagenumber) {
       this.$axios.post('/api/get_store_info', {pageNumber: pagenumber, searchState: this.$store.state.searchState})
         .then(response => {
           this.tableData = response.data.info
+          // 更新总页数
           this.totalInfoNum = response.data.totalInfoNum
+          // 关闭loading
           this.theFirstGet = false
         })
         .catch(error => {
+          this.$message({
+            type: 'error',
+            message: '初始化数据失败'
+          })
           console.log(error)
           this.theFirstGet = false
         })
     }
   },
   mounted () {
+    // 动态调整表格的高度
     window.onresize = () => {
-      this.tableHeight = document.documentElement.clientHeight - 300
+      this.tableHeight = document.documentElement.clientHeight - 310
     }
+    // 清空历史页面，使用户不能后退
     history.pushState(null, null, document.URL)
     window.addEventListener('popstate', function () {
       history.pushState(null, null, document.URL)
     })
   },
   created () {
-    // getDate 在页面加载前获取数据
+    // 初始化页面的登录权限判断
     this.$store.commit('InitializationLoginLevel', localStorage.getItem('loginLevel'))
+    // 重置获取数据的状态
     this.$store.commit('ResetSearchState')
+    // getDate 在页面加载前获取数据
     this.getTheFirstInfo(1)
+    // 重置页面的显示状态，主页面显示，添加和编辑隐藏
     this.$store.commit('InitializationMainJudge')
     this.$store.commit('InitializationEditJudge')
     this.$store.commit('InitializationAddJudge')
@@ -495,10 +537,6 @@ export default {
   margin-bottom: 30px;
   background-color: #3a4f80;
 }
-/*.dialog_input>>>.el-input__inner{
-  width: 20%;
-  margin-left: 10px;
-}*/
 .el-dialog__wrapper.dialog_showInfo>>>.el-dialog{
   margin-top:280px !important;
 }
@@ -514,9 +552,6 @@ export default {
   margin-right: 15px;
   font-size: 15px;
 }
-/*.dialog_input{
-  display: inline;
-}*/
 .el-dialog>>>button.el-button.el-button--primary{
   margin-left: 10px;
 }
@@ -537,10 +572,6 @@ export default {
   margin-left: 20px;
   margin-top:15px;
 }
-/*.superRoot{
-  display: inline;
-  margin-left: 10px;
-}*/
 .el-divider--horizontal{
   margin-bottom: 0px;
 }
@@ -552,6 +583,14 @@ export default {
 }
 .el-button.add_template_button.el-button--primary.el-loading-parent--relative>>>.el-loading-spinner{
   top:60%;
+}
+.el-select>>>.el-select__caret.el-input__icon.el-icon-arrow-up{
+  margin-right: 10px;
+}
+@media (max-width: 1050px){
+  .el-dialog__wrapper.dialog_message>>>.el-dialog{
+    width: 493px !important;
+  }
 }
 </style>
 <style>
@@ -573,9 +612,6 @@ export default {
 .button_box{
   display: flex;
   justify-content: space-between;
-}
-.el-select__caret.el-input__icon.el-icon-arrow-up{
-  margin-right: 20px;
 }
 .el-loading-spinner .circular{
   height: 30px;

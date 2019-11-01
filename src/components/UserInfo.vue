@@ -18,7 +18,7 @@
             <!-- <el-form-item label="IP地址:" >
                 <el-input v-model="formInline.ip" placeholder=" " disabled></el-input>
             </el-form-item> -->
-            <el-form-item>
+            <el-form-item label=":" class="the_end_formline">
                 <el-button type="default" @click="modifyPass('ruleForm')">修改密码</el-button>
             </el-form-item>
         </el-form>
@@ -130,7 +130,7 @@ export default {
       this.$refs[formdate].validate((valid) => {
         if (valid) {
           // getDate
-          this.$axios.get('/api/modify_password', this.ruleForm)
+          this.$axios.post('/api/modify_password', this.ruleForm)
             .then(response => {
               console.log(response)
               if (!response.data.success) {
@@ -178,7 +178,7 @@ export default {
   font-weight: bold;
 }
 .formInfo>>>.el-form-item__label{
-  margin-left: 470px;
+  margin-left: 30%;
 }
 .ruleForm>>>.el-form-item__label{
   margin-left: 25px;
@@ -200,7 +200,7 @@ export default {
   text-align: left;
 }
 .el-form>>>button.el-button.el-button--default{
-  margin-left: 860px;
+  margin-left: 310px;
   margin-top:15px;
   padding-right: 50px;
   padding-left: 50px;
@@ -218,6 +218,14 @@ export default {
   top: 100%;
   left: 0;
   margin-left: 35px;
+}
+@media (max-width: 1300px){
+  .formInfo>>>.el-form-item__label{
+    margin-left: 10%;
+  }
+}
+.el-form-item.the_end_formline >>> .el-form-item__label{
+  color: white;
 }
 </style>
 <style>

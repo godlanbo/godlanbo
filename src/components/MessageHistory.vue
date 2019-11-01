@@ -2,7 +2,7 @@
   <div class="MessageHistory">
       <el-form :inline="true" :model="formInline" ref="search" hide-required-asterisk>
         <el-form-item label="发送对象" prop="MessageTo" :rules="[{required: true, message: '不能为空', trigger: 'blur'}]">
-          <el-input v-model="formInline.MessageTo" placeholder="查找号码"></el-input>
+          <el-input v-model="formInline.MessageTo" @keyup.enter.native="searchInfo('search')" placeholder="查找号码"></el-input>
         </el-form-item>
         <el-form-item label="发送时间" label-width="100px">
           <el-col :span="11">
@@ -18,9 +18,9 @@
         </el-form-item>
       </el-form>
       <el-table  :data="tableData"  :height="tableHeight" v-loading="theFirstGet" stripe>
-        <el-table-column prop="MessageTo" label="发送对象"></el-table-column>
-        <el-table-column prop="sendTime" label="发送时间"></el-table-column>
-        <el-table-column prop="MessageInfo" label="详细信息">
+        <el-table-column prop="send_user_account" label="发送对象"></el-table-column>
+        <el-table-column prop="datetime" label="发送时间"></el-table-column>
+        <el-table-column prop="content" label="详细信息">
           <div slot-scope="scope">
             <el-button
               type="text"
@@ -56,7 +56,7 @@ export default {
   name: 'MessageHistory',
   data () {
     return {
-      tableHeight: document.getElementsByClassName('el-main')[0].clientHeight - 140,
+      tableHeight: document.documentElement.clientHeight - 246,
       formInline: {
         MessageTo: '',
         date1: '',
@@ -72,7 +72,7 @@ export default {
   },
   mounted () {
     window.onresize = () => {
-      this.tableHeight = document.documentElement.clientHeight - 296
+      this.tableHeight = document.documentElement.clientHeight - 246
     }
   },
   methods: {
@@ -140,7 +140,7 @@ export default {
       })
     },
     MessageInfoBox (index, row) {
-      this.dialogText = row.MessageInfo
+      this.dialogText = row.content
       this.dialogVisible = true
     },
     handleCurrentPage (val) {

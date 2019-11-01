@@ -47,7 +47,7 @@ export default {
   },
   watch: {
     bodyHeight: function () {
-      console.log(this.bodyHeight)
+      console.log(123)
       this.$refs.asideHeight.$el.style.height = this.bodyHeight - 100 + 'px'
     }
   },

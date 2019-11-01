@@ -25,7 +25,7 @@
         <el-dropdown-item command="4">金牌用户</el-dropdown-item>
       </el-dropdown-menu>
     </el-dropdown>
-    <el-input v-model="searchKeyWord" placeholder="用户相关信息"></el-input>
+    <el-input v-model="searchKeyWord" @keyup.enter.native="searchInfo" placeholder="用户相关信息"></el-input>
     <el-button type="primary" @click="searchInfo">查询</el-button>
     <el-table ref="multipleTable" :data="usersDate"  :height="tableHeight" @selection-change="handleSelectionChange" stripe v-loading="theFirstGet">
       <el-table-column
@@ -38,7 +38,7 @@
       <el-table-column prop="companyBoss" label="公司负责人"></el-table-column>
       <el-table-column prop="right" label="用户等级"></el-table-column>
       <!-- <el-table-column prop="password" label="密码"></el-table-column> -->
-      <el-table-column prop="ip" label="IP地址"></el-table-column>
+      <el-table-column prop="ip_addr" label="IP地址"></el-table-column>
       <el-table-column  label="操作">
         <template slot-scope="scope">
           <el-button
@@ -77,7 +77,7 @@ export default {
   },
   data () {
     return {
-      tableHeight: document.getElementsByClassName('el-main')[0].clientHeight - 210,
+      tableHeight: document.documentElement.clientHeight - 316,
       AllUsersInfo: true,
       EditUserInfo: false,
       usersDateRowIndex: 0,
@@ -102,7 +102,7 @@ export default {
   },
   mounted () {
     window.onresize = () => {
-      this.tableHeight = document.documentElement.clientHeight - 296
+      this.tableHeight = document.documentElement.clientHeight - 316
     }
     history.pushState(null, null, document.URL)
     window.addEventListener('popstate', function () {

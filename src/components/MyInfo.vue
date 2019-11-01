@@ -17,9 +17,9 @@
             </el-form-item>
 
             <el-form-item label="IP地址:" >
-                <el-input v-model="formInline.ip" placeholder=" " disabled></el-input>
+                <el-input v-model="formInline.ip_addr" placeholder=" " disabled></el-input>
             </el-form-item>
-            <el-form-item label=":">
+            <el-form-item label=":" class="the_end_formline">
                 <el-button type="primary" @click="saveModify">保存修改</el-button>
                 <el-button type="default" @click="modifyPass('ruleForm')">修改密码</el-button>
             </el-form-item>
@@ -30,7 +30,7 @@
             width="30%"
             class="dialog">
             <el-divider></el-divider>
-            <el-form :model="ruleForm" status-icon :rules="rules" ref="ruleForm" label-width="100px" class="ruleForm">
+            <el-form :model="ruleForm" status-icon :rules="rules" ref="ruleForm" label-width="80px" class="ruleForm">
               <el-form-item label="旧密码" prop="oldPass" >
                 <el-input type="password" v-model="ruleForm.oldPass" autocomplete="off"></el-input>
                 <div class="error" v-show="oldPassCheck">旧密码错误</div>
@@ -191,15 +191,16 @@ export default {
 .formInfo>>>.el-form-item__label{
   margin-left: 30%;
 }
-.ruleForm>>>.el-form-item__label{
-  margin-left: 0px;
+.ruleForm>>>.el-form-item__content{
+  margin-left: 20px !important;
+  /*float: left;*/
 }
 .ruleForm>>>.el-input__inner{
-  width: 100%;
+  width: 80%;
   font-weight: bold;
 }
 .ruleForm>>>.el-form-item__label{
-  margin-left: 25px;
+  margin-left: 10%;
 }
 .ruleForm>>>.el-form-item__error{
   margin-left: 35px;
@@ -240,20 +241,24 @@ export default {
   margin: 12px auto 30px auto;
   background-color: #3a4f80;
 }
-/*@media (max-width: 1000px){
-  .formInfo>>>.el-form-item__label{
-    margin-left: 7%;
-  }
-}*/
 @media (max-width: 1300px){
   .formInfo>>>.el-form-item__label{
     margin-left: 12%;
   }
 }
-</style>
-<style>
-
-div:nth-child(6) > label{
+@media (max-width: 1050px){
+  .el-dialog__wrapper.dialog>>>.el-dialog{
+    width: 304px !important;
+  }
+}
+@media (max-width: 1500px){
+  .ruleForm>>>.el-form-item__label{
+    margin-left: 3%;
+  }
+}
+.el-form-item.the_end_formline >>> .el-form-item__label{
   color: white;
 }
+</style>
+<style>
 </style>

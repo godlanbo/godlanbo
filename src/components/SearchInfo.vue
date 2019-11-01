@@ -3,7 +3,7 @@
     <div v-if="$store.state.MainJudge">
       <el-form  :model="formInline" :rules="rules" ref="search" :inline="true" hide-required-asterisk>
         <el-form-item label="关键字" prop="keyword">
-          <el-input v-model="formInline.keyword" placeholder="相关信息"></el-input>
+          <el-input v-model="formInline.keyword" @keyup.enter.native="submitSearch('search')" placeholder="相关信息"></el-input>
         </el-form-item>
       <el-form-item>
         <el-button type="primary" @click="submitSearch('search')">查询</el-button>
@@ -11,7 +11,7 @@
       </el-form-item>
     </el-form>
 
-      <el-table  ref="multipleTable" :data="tableData"  height="610" stripe v-loading="theFirstGet">
+      <el-table  ref="multipleTable" :data="tableData"  :height="tableHeight" stripe v-loading="theFirstGet">
         <el-table-column
           type="selection"
           width="55"
@@ -42,6 +42,7 @@ export default {
   name: 'SearchInfo',
   data () {
     return {
+      tableHeight: document.documentElement.clientHeight - 266,
       tableDateRowIndex: 0,
       resetPage: 1,
       totalInfoNum: 1,
@@ -133,6 +134,9 @@ export default {
     }
   },
   mounted () {
+    window.onresize = () => {
+      this.tableHeight = document.documentElement.clientHeight - 266
+    }
     history.pushState(null, null, document.URL)
     window.addEventListener('popstate', function () {
       history.pushState(null, null, document.URL)
