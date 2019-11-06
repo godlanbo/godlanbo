@@ -18,7 +18,7 @@
         </el-form-item>
       </el-form>
       <el-table  :data="tableData"  :height="tableHeight" v-loading="theFirstGet" stripe>
-        <el-table-column prop="send_user_account" label="发送对象"></el-table-column>
+        <el-table-column prop="recv_telnum" label="发送对象"></el-table-column>
         <el-table-column prop="datetime" label="发送时间"></el-table-column>
         <el-table-column prop="content" label="详细信息">
           <div slot-scope="scope">

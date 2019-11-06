@@ -97,7 +97,6 @@ export default {
   },
   methods: {
     saveModify () {
-      console.log(this.checkModify)
       if (JSON.stringify(this.formInline) === JSON.stringify(this.checkModify)) {
         this.$alert('没有要保存的修改', '注意', '确定')
         return

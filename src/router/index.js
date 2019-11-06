@@ -14,15 +14,9 @@ import SearchInfo from '@/components/SearchInfo'
 import UserInfo from '@/components/UserInfo'
 import Error404 from '@/components/Error404'
 import Error500 from '@/components/Error500'
-import Error401 from '@/components/Error401'
 
 Vue.use(Router)
 const routes = [
-  {
-    path: '/401',
-    name: '401',
-    component: Error401
-  },
   {
     path: '/500',
     name: '500',

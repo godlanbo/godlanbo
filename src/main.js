@@ -28,27 +28,21 @@ axios.interceptors.request.use(
     return config
   },
   err => {
-    console.log(-1)
     return Promise.reject(err)
   })
 // 响应拦截器
 axios.interceptors.response.use(
   response => {
-    if (response.headers.code === 10010 || response.headers.code === 10011) {
+    return response
+  },
+  error => {
+    if (error.response.status === 401) {
       alert('登录超时')
       localStorage.setItem('Authorization', null)
       localStorage.setItem('loginLevel', null)
       localStorage.setItem('Identity', null)
       router.replace({
         path: '/Login'
-      })
-    }
-    return response
-  },
-  error => {
-    if (error.response.status === 401) {
-      router.replace({
-        path: '/401'
       })
     } else if (error.response.status === 500) {
       router.replace({

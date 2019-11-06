@@ -39,6 +39,7 @@
           <!-- <el-input class="dialog_input" v-model="inputTemplateCode" placeholder="填写模板code"></el-input> -->
         <el-button @click="addTemplateCode" style="margin-left: 10px;" type="primary" class="add_template_button" v-if="$store.state.loginLevel == 'superRoot'">添加模板</el-button>
         <a href="https://signin.aliyun.com/login.htm" target="_blank" v-if="$store.state.loginLevel == 'superRoot'"><el-button type="primary" style="margin-left: 10px;">获得code</el-button></a>
+        <el-button type="default" class="clear_selection" @click="clearSelection">清空选项</el-button>
         <!-- </div> -->
 
       </el-form-item>
@@ -111,7 +112,17 @@
             width="50%"
             @opened="beforeOpen">
             <el-divider></el-divider>
-            <el-input v-model="signName" placeholder="填写公司签名" class="signName_input"></el-input>
+
+            <!-- <el-input v-model="signName" placeholder="填写公司签名" @focus="onFocus" class="signName_input"></el-input> -->
+            <el-autocomplete
+              class="signName_input"
+              v-model="inputCompanySign"
+              :fetch-suggestions="querySearch"
+              :trigger-on-focus="false"
+              placeholder="填写公司签名"
+              @focus="getHistoryCompanySign"
+            ></el-autocomplete>
+
             <el-table class="dialog_table" :data="templateData" stripe height="400">
               <el-table-column
                label="Select">
@@ -178,6 +189,13 @@ export default {
       dialogText: '',
       totalInfoNum: 10,
       inputTemplateCode: '',
+      inputCompanySign: '',
+      historyCompanySign: [
+        {'value': '1a1'},
+        {'value': '2a2'},
+        {'value': '2A2'},
+        {'value': '3ba'}
+      ],
       formInline: {
         keyword: '',
         infofrom: 'all',
@@ -185,7 +203,6 @@ export default {
         date1: '',
         date2: ''
       },
-      signName: null,
       checked: null,
       templateData: [],
       templateLoading: null,
@@ -197,18 +214,47 @@ export default {
       // }
       resetPage: 1,
       rules: {
-        // keyword: [{required: true, message: '不能为空', trigger: 'blur'}],
         infofrom: [{required: true, message: '不能为空', trigger: 'blur'}],
         path: [{required: true, message: '不能为空', trigger: 'blur'}]
       },
       tableData: [],
       multipleSelection: [],
-      theFirstGet: true
+      theFirstGet: true,
+      allOutPutInfo: []
     }
   },
   methods: {
+    // 清空所选项
+    clearSelection () {
+      this.$refs.multipleTable.clearSelection()
+      this.allOutPutInfo = []
+      this.multipleSelection = []
+    },
+    // 获得所有历史输入的公司签名
+    getHistoryCompanySign () {
+      this.$axios.get('/api/get_sign')
+        .then(response => {
+          this.historyCompanySign = response.data
+        })
+        .catch(error => {
+          console.log(error)
+        })
+    },
+    // 查询并把准备好的输入建议返回到input输入框
+    querySearch (queryString, cb) {
+      // 创建准备好的数据，输入不为空就匹配所有历史中相似的语句
+      var results = queryString ? this.historyCompanySign.filter(this.matchingSuggestion(queryString)) : []
+      // 调用 callback 返回建议列表的数据
+      cb(results)
+    },
+    // 匹配输入的字符串函数
+    matchingSuggestion (queryString) {
+      return (sign) => {
+        return sign.value.indexOf(queryString) !== -1
+      }
+    },
+    // 在短信模板框打开前loading模板表格
     beforeOpen () {
-      // console.log(document.querySelector('.dialog_table'))
       this.templateLoading = this.$loading({target: document.querySelector('.dialog_table')})
       // 获取所有模板信息
       this.getAllTemplateInfo()
@@ -256,7 +302,6 @@ export default {
     },
     // 获得所有模板信息
     getAllTemplateInfo () {
-      // let loading = this.$loading({target: document.querySelector('.dialog_table')})
       this.$axios.get('/api/get_all_template')
         .then(response => {
           this.templateData = response.data.all_template
@@ -277,7 +322,7 @@ export default {
         this.$alert('请先选中模板', '注意', '确定')
         return
       }
-      if (this.signName === null) {
+      if (this.inputCompanySign === '') {
         this.$alert('公司签名不能为空', '注意', '确定')
         return
       }
@@ -287,7 +332,7 @@ export default {
         type: 'warning'
       }).then(() => {
         let loading = this.$loading({target: document.querySelector('.submit_message')})
-        this.$axios.post('/api/send_message', {templateCode: this.checked, acceptUsers: this.multipleSelection, signName: this.signName})
+        this.$axios.post('/api/send_message', {templateCode: this.checked, acceptUsers: this.allOutPutInfo, signName: this.inputCompanySign})
           .then(response => {
             this.dialogVisibleMessage = false
             this.$message({
@@ -313,11 +358,15 @@ export default {
     },
     // 导出商户信息
     outPutInfo () {
-      if (this.multipleSelection.length === 0) {
+      if (this.allOutPutInfo.length === 0) {
         this.$alert('请勾选商户后再导出！', '注意', '确定')
         return
       }
-      this.$axios.post('/api/output_info', this.multipleSelection)
+      if (this.allOutPutInfo.length >= 40) {
+        this.$alert('单次导出不超过40个！', '注意', '确定')
+        return
+      }
+      this.$axios.post('/api/output_info', this.allOutPutInfo)
         .then(response => {
           if (!response) {
             return
@@ -441,14 +490,17 @@ export default {
     // 将数组指向为所选的对象数组
     handleSelectionChange (val) {
       this.multipleSelection = val
+      this.allOutPutInfo = this.multipleSelection.concat(this.allOutPutInfo).filter((value, index, arr) => {
+        return arr.map(value_ => JSON.stringify(value_)).indexOf(JSON.stringify(value)) === index
+      })
     },
     // 控制弹出的模板选择窗口
     sendMessageBox () {
-      if (this.multipleSelection.length === 0) {
+      if (this.allOutPutInfo.length === 0) {
         this.$alert('请勾选商户后再点击群发短信！', '注意', '确定').then(() => {}).catch(() => {})
       } else {
         // 重置签名
-        this.signName = null
+        this.inputCompanySign = ''
         // 重置模板的选择
         this.checked = null
         // 弹窗显示设置为true
@@ -461,6 +513,15 @@ export default {
       this.$axios.post('/api/get_store_info', {pageNumber: pagenumber, searchState: this.$store.state.searchState})
         .then(response => {
           this.tableData = response.data.info
+          setTimeout(() => {
+            for (let i = 0; i < this.tableData.length; i++) {
+              for (let j = 0; j < this.allOutPutInfo.length; j++) {
+                if (this.tableData[i].web_link === this.allOutPutInfo[j].web_link) {
+                  this.$refs.multipleTable.toggleRowSelection(this.tableData[i])
+                }
+              }
+            }
+          }, 100)
           // 更新总页数
           this.totalInfoNum = response.data.totalInfoNum
           loading.close()
@@ -567,8 +628,8 @@ export default {
 .el-select>>>.el-input__inner{
   width: 95%;
 }
-.signName_input.el-input>>>.el-input__inner{
-  width: 30%;
+.el-autocomplete.signName_input>>>.el-input__inner{
+  /*width: 30%;*/
   margin-left: 20px;
   margin-top:15px;
 }
@@ -612,6 +673,12 @@ export default {
 .button_box{
   display: flex;
   justify-content: space-between;
+}
+.el-scrollbar > .el-autocomplete-suggestion__wrap.el-scrollbar__wrap{
+  padding: 0px;
+}
+.el-form-item__content > .clear_selection{
+  margin-left: 10px;
 }
 .el-loading-spinner .circular{
   height: 30px;

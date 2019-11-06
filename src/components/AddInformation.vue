@@ -32,7 +32,6 @@
         <el-select v-model="formInline.web" placeholder="请选择" :disabled="$store.state.automaticGrabState&&formInline.infofrom != '手动生成'" style="width: 93%;">
           <el-option label="美团" value="美团"></el-option>
           <el-option label="大众点评" value="大众点评"></el-option>
-          <el-option label="全部" value="全部"></el-option>
         </el-select>
       </el-form-item>
       <el-form-item label="备注:" >

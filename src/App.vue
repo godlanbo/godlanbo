@@ -9,6 +9,8 @@
 export default {
   name: 'app',
   created () {
+    // document.body.removeChild(document.getElementById('loader-wrapper'))
+    document.getElementById('loader-wrapper').style.display = 'none'
     let temp = localStorage.getItem('loginLevel')
     if (temp === 'null' || temp === undefined) {
       if (this.$route.path !== '/Login') {
@@ -27,7 +29,7 @@ export default {
 <style type="text/css">
 body{
   margin: 0px;
-  min-width: 1000px;
+  min-width: 1150px;
 }
 .app .el-main{
   margin-top: 10px;

@@ -30,10 +30,7 @@
             <el-form-item label="渠道:" >
                 <el-select v-model="formInline.web" placeholder="请选择" style="width: 93%;">
                     <el-option label="美团" value="美团"></el-option>
-                    <el-option label="饿了么" value="饿了么"></el-option>
                     <el-option label="大众点评" value="大众点评"></el-option>
-                    <el-option label="口碑" value="口碑"></el-option>
-                    <el-option label="全部" value="全部"></el-option>
                 </el-select>
             </el-form-item>
             <el-form-item label="评论数:" prop="comment_num">

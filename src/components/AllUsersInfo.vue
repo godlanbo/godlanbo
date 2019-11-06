@@ -44,12 +44,12 @@
           <el-button
             size="mini"
             @click="handleEdit(scope.$index, scope.row)"
-            :disabled="scope.row.right === '管理员'||$store.state.loginLevel !== 'superRoot'">编辑</el-button>
+            :disabled="scope.row.right === '管理员'&&$store.state.loginLevel !== 'superRoot'">编辑</el-button>
           <el-button
             size="mini"
             type="danger"
             @click="handleDelete(scope.$index, scope.row)"
-            :disabled="scope.row.right === '管理员'||$store.state.loginLevel !== 'superRoot'">删除</el-button>
+            :disabled="scope.row.right === '管理员'&&$store.state.loginLevel !== 'superRoot'">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -86,6 +86,7 @@ export default {
       resetPage: 1,
       usersDate: [],
       multipleTable: [],
+      allOutPutInfo: [],
       searchKeyWord: '',
       theFirstGet: true
     }
@@ -122,6 +123,15 @@ export default {
       this.$axios.post('/api/get_user_info', {pageNumber: pagenumber, searchState: this.$store.state.searchState})
         .then(response => {
           this.usersDate = response.data.user_info
+          setTimeout(() => {
+            for (let i = 0; i < this.tableData.length; i++) {
+              for (let j = 0; j < this.allOutPutInfo.length; j++) {
+                if (this.tableData[i].account === this.allOutPutInfo[j].account) {
+                  this.$refs.multipleTable.toggleRowSelection(this.tableData[i])
+                }
+              }
+            }
+          }, 100)
           this.totalInfoNum = response.data.totalInfoNum
           loading.close()
         })
@@ -162,7 +172,7 @@ export default {
       this.getDate(this.resetPage)
     },
     deleteSelectInfo () {
-      if (this.multipleTable.length === 0) {
+      if (this.allOutPutInfo.length === 0) {
         this.$alert('请勾选用户后再操作！', '注意', '确定')
         return
       }
@@ -171,9 +181,9 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        this.$axios.post('/api/del_user', this.multipleTable)
+        this.$axios.post('/api/del_user', this.allOutPutInfo)
           .then(response => {
-            if (this.multipleTable.length === this.usersDate.length) {
+            if (this.allOutPutInfo.length === this.usersDate.length) {
               this.resetPage -= 1
             }
             this.getDate(this.resetPage)
@@ -197,7 +207,7 @@ export default {
       })
     },
     handleCommand (command) {
-      if (this.multipleTable.length === 0) {
+      if (this.allOutPutInfo.length === 0) {
         this.$alert('请勾选用户后再操作！', '注意', '确定')
       } else {
         this.$confirm('是否变更选中用户权限?', '提示', {
@@ -205,7 +215,7 @@ export default {
           cancelButtonText: '取消',
           type: 'warning'
         }).then(() => {
-          this.$axios.post('/api/modify_right', {toRight: command, allUser: this.multipleTable})
+          this.$axios.post('/api/modify_right', {toRight: command, allUser: this.allOutPutInfo})
             .then(response => {
               this.getDate(this.resetPage)
               this.$message({
@@ -230,6 +240,9 @@ export default {
     },
     handleSelectionChange (val) {
       this.multipleTable = val
+      this.allOutPutInfo = this.multipleTable.concat(this.allOutPutInfo).filter((value, index, arr) => {
+        return arr.map(value_ => JSON.stringify(value_)).indexOf(JSON.stringify(value)) === index
+      })
     },
     handleEdit (index, row) {
       this.AllUsersInfo = !this.AllUsersInfo

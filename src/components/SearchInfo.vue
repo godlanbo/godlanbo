@@ -1,21 +1,26 @@
 <template>
   <div class="SearchInfo">
     <div v-if="$store.state.MainJudge">
-      <el-form  :model="formInline" :rules="rules" ref="search" :inline="true" hide-required-asterisk>
+      <el-form  :model="formInline" :rules="rules" ref="search" :inline="true" @submit.native.prevent hide-required-asterisk >
         <el-form-item label="关键字" prop="keyword">
-          <el-input v-model="formInline.keyword" @keyup.enter.native="submitSearch('search')" placeholder="相关信息"></el-input>
+          <el-input v-model="formInline.keyword"  placeholder="相关信息" @keyup.enter.native="submitSearch('search')"></el-input>
         </el-form-item>
       <el-form-item>
         <el-button type="primary" @click="submitSearch('search')">查询</el-button>
-        <el-button :disabled="$store.state.loginLevel !=='jinpai'" @click="outputInfo">导出</el-button>
+        <el-button :disabled="$store.state.loginLevel !=='金牌用户'" @click="outputInfo">导出</el-button>
       </el-form-item>
     </el-form>
 
-      <el-table  ref="multipleTable" :data="tableData"  :height="tableHeight" stripe v-loading="theFirstGet">
+      <el-table
+      ref="multipleTable"
+      :data="tableData"
+      :height="tableHeight"
+      stripe
+      @selection-change="handleSelectionChange">
         <el-table-column
           type="selection"
           width="55"
-          v-if="$store.state.loginLevel !=='jinpai'">
+          v-if="$store.state.loginLevel !=='金牌用户'">
         </el-table-column>
         <el-table-column prop="store_name" label="商户名称" >
         </el-table-column>
@@ -57,7 +62,9 @@ export default {
       rules: {
         keyword: [{required: true, message: '不能为空', trigger: 'blur'}]
       },
-      tableData: []
+      tableData: [],
+      multipleTable: [],
+      allOutPutInfo: []
     }
   },
   methods: {
@@ -74,6 +81,7 @@ export default {
                 return
               }
               this.tableData = response.data.info
+              this.totalInfoNum = response.data.totalInfoNum
               loading.close()
               this.$store.commit('OpenSearchState')
               this.resetPage = 1
@@ -87,12 +95,22 @@ export default {
         }
       })
     },
+    handleSelectionChange (val) {
+      this.multipleTable = val
+      this.allOutPutInfo = this.multipleTable.concat(this.allOutPutInfo).filter((value, index, arr) => {
+        return arr.map(value_ => JSON.stringify(value_)).indexOf(JSON.stringify(value)) === index
+      })
+    },
     outputInfo () {
-      if (this.multipleSelection.length === 0) {
-        this.$alert('请勾选商户后再导出！', '注意', '确定')
+      if (this.multipleTable.length === 0) {
+        this.$alert('请勾选商户后再导出！', '注意', '确定').then(() => {}).catch(() => {})
         return
       }
-      this.$axios.post('/api/output_info', this.multipleSelection)
+      if (this.allOutPutInfo.length >= 20) {
+        this.$alert('单次导出不超过20个！', '注意', '确定')
+        return
+      }
+      this.$axios.post('/api/output_info', this.allOutPutInfo)
         .then(response => {
           if (!response) {
             return
@@ -126,6 +144,15 @@ export default {
       this.$axios.post('/api/get_store_info', {pageNumber: pagenumber, searchState: this.$store.state.searchState})
         .then(response => {
           this.tableData = response.data.info
+          setTimeout(() => {
+            for (let i = 0; i < this.tableData.length; i++) {
+              for (let j = 0; j < this.allOutPutInfo.length; j++) {
+                if (this.tableData[i].web_link === this.allOutPutInfo[j].web_link) {
+                  this.$refs.multipleTable.toggleRowSelection(this.tableData[i])
+                }
+              }
+            }
+          }, 100)
           this.totalInfoNum = response.data.totalInfoNum
           loading.close()
         })
@@ -160,7 +187,7 @@ export default {
     // getDate 在页面加载前获取数据
     this.$store.commit('InitializationLoginLevel', localStorage.getItem('loginLevel'))
     this.$store.commit('ResetSearchState')
-    this.getFirstInfo(1)
+    // this.getFirstInfo(1)
   }
 }
 </script>

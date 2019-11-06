@@ -91,7 +91,7 @@ export default {
   width: 400px;
   margin: 180px auto;
   padding: 0px 20px 15px 20px;
-  -webkit-border-radius: 8px;
+  border-radius: 8px;
   box-shadow: -16px 20px 20px 3px #909399;
 }
 .el-divider{

@@ -28,10 +28,10 @@
         </el-table-column>
         <el-table-column prop="account" label="账户" ></el-table-column>
         <el-table-column prop="company" label="公司" ></el-table-column>
-        <el-table-column prop="telnum" label="联系人" ></el-table-column>
-        <el-table-column prop="privilegeLevel" label="用户权限" ></el-table-column>
+        <el-table-column prop="companyBoss" label="公司负责人" ></el-table-column>
+        <el-table-column prop="right" label="用户权限" ></el-table-column>
         <el-table-column prop="password" label="密码" ></el-table-column>
-        <el-table-column prop="ip" label="IP地址" ></el-table-column>
+        <el-table-column prop="ip_addr" label="IP地址" ></el-table-column>
         <el-table-column label="操作" >
           <div slot-scope="scope">
             <el-button type="default" size="mini" @click="RecoveryInfo(scope.$index, scope.row)">恢复用户</el-button>
