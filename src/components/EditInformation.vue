@@ -179,6 +179,10 @@ export default {
   margin: 12px auto 30px auto;
   background-color: #3a4f80;
 }
+.el-select>>>.el-select__caret.el-input__icon.el-icon-arrow-up{
+  margin-right: -450px;
+  /*margin-left: 100px;*/
+}
 .el-form-item.the_end_formline >>> .el-form-item__label{
   color: white;
 }

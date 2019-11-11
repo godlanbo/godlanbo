@@ -20,7 +20,7 @@
         <el-table-column
           type="selection"
           width="55"
-          v-if="$store.state.loginLevel !=='金牌用户'">
+          v-if="$store.state.loginLevel ==='金牌用户'">
         </el-table-column>
         <el-table-column prop="store_name" label="商户名称" >
         </el-table-column>
@@ -136,7 +136,7 @@ export default {
         })
     },
     handleCurrentPage (val) {
-      // 传递给后端，重新获取数据
+      // 传递页数给后端，重新获取数据
       this.getDate(val)
     },
     getDate (pagenumber) {

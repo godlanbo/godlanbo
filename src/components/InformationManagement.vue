@@ -69,8 +69,6 @@
           </template>
 
         </el-table-column>
-       <!--  <el-table-column prop="adminName" label="联系人">
-        </el-table-column> -->
         <el-table-column prop="phone_number" label="电话">
         </el-table-column>
         <el-table-column prop="infofrom" label="信息来源">
@@ -112,8 +110,6 @@
             width="50%"
             @opened="beforeOpen">
             <el-divider></el-divider>
-
-            <!-- <el-input v-model="signName" placeholder="填写公司签名" @focus="onFocus" class="signName_input"></el-input> -->
             <el-autocomplete
               class="signName_input"
               v-model="inputCompanySign"
@@ -402,7 +398,11 @@ export default {
               this.totalInfoNum = response.data.totalInfoNum
               loading.close()
             })
-            .catch(function (error) {
+            .catch(error => {
+              this.$message({
+                type: 'error',
+                message: '搜索信息失败'
+              })
               console.log(error)
               loading.close()
             })
@@ -467,6 +467,7 @@ export default {
       }).then(() => {
         this.$axios.post('/api/del_store', row)
           .then(response => {
+            this.allOutPutInfo.splice(this.allOutPutInfo.indexOf(row), 1)
             this.$message({
               type: 'success',
               message: '删除成功!'

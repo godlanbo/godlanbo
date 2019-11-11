@@ -64,7 +64,8 @@ export default {
       theFirstGet: true,
       resetPage: 1,
       tableInfo: [],
-      multipleTable: []
+      multipleTable: [],
+      allOutPutInfo: []
     }
   },
   created () {
@@ -138,6 +139,15 @@ export default {
       this.$axios.post('/api/get_re_user', {pageNumber: pagenumber, searchState: this.$store.state.searchState})
         .then(response => {
           this.tableInfo = response.data.re_user_info
+          setTimeout(() => {
+            for (let i = 0; i < this.tableInfo.length; i++) {
+              for (let j = 0; j < this.allOutPutInfo.length; j++) {
+                if (this.tableInfo[i].account === this.allOutPutInfo[j].account) {
+                  this.$refs.multipleTable.toggleRowSelection(this.tableInfo[i])
+                }
+              }
+            }
+          }, 100)
           this.totalInfoNum = response.data.totalInfoNum
           loading.close()
         })
@@ -159,6 +169,8 @@ export default {
               message: '删除成功!'
             })
             this.getDate(this.resetPage)
+            // 从总的标记数组中移除这个用户信息
+            this.allOutPutInfo.splice(this.allOutPutInfo.indexOf(row), 1)
           })
           .catch(error => {
             this.$message({
@@ -176,9 +188,12 @@ export default {
     },
     handleSelectionChange (val) {
       this.multipleTable = val
+      this.allOutPutInfo = this.multipleTable.concat(this.allOutPutInfo).filter((value, index, arr) => {
+        return arr.map(value_ => JSON.stringify(value_)).indexOf(JSON.stringify(value)) === index
+      })
     },
     deleteSelectInfo () {
-      if (this.multipleTable.length === 0) {
+      if (this.allOutPutInfo.length === 0) {
         this.$alert('请勾选信息后再操作！', '注意', '确定')
         return
       }
@@ -187,12 +202,14 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        this.$axios.post('/api/del_re_user', this.multipleTable)
+        this.$axios.post('/api/del_re_user', this.allOutPutInfo)
           .then(response => {
             this.$message({
               type: 'success',
               message: '删除成功!'
             })
+            // 清空存放全部标记对象的数组
+            this.allOutPutInfo = []
             this.getDate(this.resetPage)
           })
           .catch(error => {
@@ -210,7 +227,7 @@ export default {
       })
     },
     recoverySelectInfo () {
-      if (this.multipleTable.length === 0) {
+      if (this.allOutPutInfo.length === 0) {
         this.$alert('请勾选信息后再操作！', '注意', '确定')
         return
       }
@@ -219,12 +236,13 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        this.$axios.post('/api/re_user', this.multipleTable)
+        this.$axios.post('/api/re_user', this.allOutPutInfo)
           .then(response => {
             this.$message({
               type: 'success',
               message: '恢复成功!'
             })
+            this.allOutPutInfo = []
             this.getDate(this.resetPage)
           })
           .catch(error => {

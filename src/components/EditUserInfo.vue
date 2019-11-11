@@ -31,7 +31,7 @@
             <el-form-item label="IP地址:" >
                 <el-input v-model="formInline.ip" placeholder=" " disabled></el-input>
             </el-form-item>
-            <el-form-item>
+            <el-form-item label=":" class="the_end_formline">
                 <el-button type="primary" @click="save_add">保存</el-button>
                 <el-button  @click="cancel">取消</el-button>
             </el-form-item>
@@ -104,10 +104,9 @@ export default {
   width: 210%;
 }
 .el-form>>>.el-form-item__label{
-  margin-left: 470px;
+  margin-left: 30%;
 }
 .el-form>>>button.el-button.el-button--primary{
-  margin-left: 560px;
   margin-top:15px;
   padding-right: 50px;
   padding-left: 50px;
@@ -118,9 +117,21 @@ export default {
   padding-right: 50px;
   padding-left: 50px;
 }
+.el-select>>>.el-select__caret.el-input__icon.el-icon-arrow-up{
+  margin-right: -450px;
+  /*margin-left: 100px;*/
+}
 .el-divider{
   margin: 12px auto 30px auto;
   background-color: #3a4f80;
+}
+.el-form-item.the_end_formline >>> .el-form-item__label{
+  color: white;
+}
+@media (max-width: 1300px){
+  .el-form>>>.el-form-item__label{
+    margin-left: 12%;
+  }
 }
 </style>
 <style>

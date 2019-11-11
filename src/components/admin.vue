@@ -24,7 +24,6 @@
               <el-menu-item index="/admin/MyInfo" @click="toSomeRouter('MyInfo')">个人资料</el-menu-item>
             </el-submenu>
             <el-divider v-if="isDivider"></el-divider>
-            <!-- <el-menu-item index="/admin/UsersInfoAndOperation" @click="toUsersInfoAndOperation">用户</el-menu-item> -->
             <el-menu-item index="/admin/RecycleBin" @click="toSomeRouter('RecycleBin')">回收站</el-menu-item>
           </el-menu>
         </el-aside>
@@ -160,9 +159,4 @@ body{
 .cell {
   text-align: center;
 }
-/*.el-main{
-  margin-top: 10px;
-  padding-top: 0px;
-  padding-bottom: 0px;
-}*/
 </style>

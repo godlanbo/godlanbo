@@ -37,7 +37,6 @@
       <el-table-column prop="telnum" label="公司电话"></el-table-column>
       <el-table-column prop="companyBoss" label="公司负责人"></el-table-column>
       <el-table-column prop="right" label="用户等级"></el-table-column>
-      <!-- <el-table-column prop="password" label="密码"></el-table-column> -->
       <el-table-column prop="ip_addr" label="IP地址"></el-table-column>
       <el-table-column  label="操作">
         <template slot-scope="scope">
@@ -124,10 +123,10 @@ export default {
         .then(response => {
           this.usersDate = response.data.user_info
           setTimeout(() => {
-            for (let i = 0; i < this.tableData.length; i++) {
+            for (let i = 0; i < this.usersDate.length; i++) {
               for (let j = 0; j < this.allOutPutInfo.length; j++) {
-                if (this.tableData[i].account === this.allOutPutInfo[j].account) {
-                  this.$refs.multipleTable.toggleRowSelection(this.tableData[i])
+                if (this.usersDate[i].account === this.allOutPutInfo[j].account) {
+                  this.$refs.multipleTable.toggleRowSelection(this.usersDate[i])
                 }
               }
             }
@@ -135,7 +134,11 @@ export default {
           this.totalInfoNum = response.data.totalInfoNum
           loading.close()
         })
-        .catch(function (error) {
+        .catch(error => {
+          this.$message({
+            type: 'error',
+            message: '拉取用户信息失败'
+          })
           console.log(error)
           loading.close()
         })
@@ -147,7 +150,12 @@ export default {
           this.totalInfoNum = response.data.totalInfoNum
           this.theFirstGet = false
         })
-        .catch(function (error) {
+        .catch(error => {
+          this.$message({
+            type: 'error',
+            message: '拉取用户信息失败'
+          })
+          this.theFirstGet = false
           console.log(error)
         })
     },
@@ -161,7 +169,11 @@ export default {
           loading.close()
           this.resetPage = 1
         })
-        .catch(function (error) {
+        .catch(error => {
+          this.$message({
+            type: 'error',
+            message: '搜索数据失败'
+          })
           console.log(error)
           loading.close()
         })
@@ -186,6 +198,7 @@ export default {
             if (this.allOutPutInfo.length === this.usersDate.length) {
               this.resetPage -= 1
             }
+            this.allOutPutInfo = []
             this.getDate(this.resetPage)
             this.$message({
               type: 'success',
@@ -217,6 +230,7 @@ export default {
         }).then(() => {
           this.$axios.post('/api/modify_right', {toRight: command, allUser: this.allOutPutInfo})
             .then(response => {
+              this.allOutPutInfo = []
               this.getDate(this.resetPage)
               this.$message({
                 type: 'success',
@@ -258,6 +272,8 @@ export default {
         this.$axios.post('/api/del_user', row)
           .then(response => {
             this.usersDate.splice(index, 1)
+            this.multipleTable.splice(this.multipleTable.indexOf(row), 1)
+            this.allOutPutInfo.splice(this.allOutPutInfo.indexOf(row), 1)
             this.$message({
               type: 'success',
               message: '删除成功!'
