@@ -16,7 +16,8 @@
       :data="tableData"
       :height="tableHeight"
       stripe
-      @selection-change="handleSelectionChange">
+      @select-all='handleAllSelection'
+      @select="handleSingleSelect">
         <el-table-column
           type="selection"
           width="55"
@@ -63,11 +64,30 @@ export default {
         keyword: [{required: true, message: '不能为空', trigger: 'blur'}]
       },
       tableData: [],
-      multipleTable: [],
-      allOutPutInfo: []
+      allOutputInfo: []
     }
   },
   methods: {
+    handleAllSelection (selection) {
+      if (selection.length !== 0) {
+        let set = new Set(this.allOutputInfo.concat(selection).map(value => JSON.stringify(value)))
+        this.allOutputInfo = [...set].map(value => JSON.parse(value))
+      } else {
+        this.allOutputInfo = this.allOutputInfo.concat(this.tableData).filter((value, index, arr) => {
+          let tempArr = arr.map(value_ => JSON.stringify(value_))
+          let tempValue = JSON.stringify(value)
+          return tempArr.indexOf(tempValue) === tempArr.lastIndexOf(tempValue)
+        })
+      }
+    },
+    handleSingleSelect (selection, row) {
+      let theRowIndexInAllInfo = this.allOutputInfo.map(value => JSON.stringify(value)).indexOf(JSON.stringify(row))
+      if (theRowIndexInAllInfo === -1) {
+        this.allOutputInfo = this.allOutputInfo.concat(row)
+      } else {
+        this.allOutputInfo.splice(theRowIndexInAllInfo, 1)
+      }
+    },
     submitSearch (formdate) {
       // 提交数据到后端查询，接受返回数据
       this.$refs[formdate].validate((valid) => {
@@ -86,7 +106,11 @@ export default {
               this.$store.commit('OpenSearchState')
               this.resetPage = 1
             })
-            .catch(function (error) {
+            .catch(error => {
+              this.$message({
+                type: 'error',
+                message: '查询数据失败'
+              })
               console.log(error)
               loading.close()
             })
@@ -95,22 +119,16 @@ export default {
         }
       })
     },
-    handleSelectionChange (val) {
-      this.multipleTable = val
-      this.allOutPutInfo = this.multipleTable.concat(this.allOutPutInfo).filter((value, index, arr) => {
-        return arr.map(value_ => JSON.stringify(value_)).indexOf(JSON.stringify(value)) === index
-      })
-    },
     outputInfo () {
-      if (this.multipleTable.length === 0) {
+      if (this.allOutputInfo.length === 0) {
         this.$alert('请勾选商户后再导出！', '注意', '确定').then(() => {}).catch(() => {})
         return
       }
-      if (this.allOutPutInfo.length >= 20) {
+      if (this.allOutputInfo.length >= 20) {
         this.$alert('单次导出不超过20个！', '注意', '确定')
         return
       }
-      this.$axios.post('/api/output_info', this.allOutPutInfo)
+      this.$axios.post('/api/output_info', this.allOutputInfo)
         .then(response => {
           if (!response) {
             return
@@ -119,6 +137,8 @@ export default {
             this.$alert('导出次数已用完！', '注意', '确定').then(() => {}).catch(() => {})
             return
           }
+          this.allOutputInfo = []
+          this.$refs.multipleTable.clearSelection()
           let url = window.URL.createObjectURL(new Blob([response.data]))
           let link = document.createElement('a')
           link.style.display = 'none'
@@ -146,8 +166,8 @@ export default {
           this.tableData = response.data.info
           setTimeout(() => {
             for (let i = 0; i < this.tableData.length; i++) {
-              for (let j = 0; j < this.allOutPutInfo.length; j++) {
-                if (this.tableData[i].web_link === this.allOutPutInfo[j].web_link) {
+              for (let j = 0; j < this.allOutputInfo.length; j++) {
+                if (this.tableData[i].web_link === this.allOutputInfo[j].web_link) {
                   this.$refs.multipleTable.toggleRowSelection(this.tableData[i])
                 }
               }

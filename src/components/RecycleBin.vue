@@ -21,7 +21,14 @@
       <el-button @click="recoverySelectInfo">
         <i class="el-icon-finished">批量恢复</i>
       </el-button>
-      <el-table ref="multipleTable" :data="tableInfo"  :height="tableHeight" stripe @selection-change="handleSelectionChange" v-loading="theFirstGet">
+      <el-table
+        ref="multipleTable"
+        :data="tableInfo"
+        :height="tableHeight"
+        stripe
+        @select-all="handleAllSelection"
+        @select="handleSingleSelect"
+        v-loading="theFirstGet">
         <el-table-column
           type="selection"
           width="55">
@@ -64,8 +71,8 @@ export default {
       theFirstGet: true,
       resetPage: 1,
       tableInfo: [],
-      multipleTable: [],
-      allOutPutInfo: []
+      // multipleTable: [],
+      allOutputInfo: []
     }
   },
   created () {
@@ -91,6 +98,10 @@ export default {
               type: 'success',
               message: '恢复成功!'
             })
+            let theRowIndexInAllInfo = this.allOutputInfo.map(value => JSON.stringify(value)).indexOf(JSON.stringify(row))
+            if (theRowIndexInAllInfo !== -1) {
+              this.allOutputInfo.splice(theRowIndexInAllInfo, 1)
+            }
             this.getDate(this.resetPage)
           })
           .catch(error => {
@@ -141,8 +152,8 @@ export default {
           this.tableInfo = response.data.re_user_info
           setTimeout(() => {
             for (let i = 0; i < this.tableInfo.length; i++) {
-              for (let j = 0; j < this.allOutPutInfo.length; j++) {
-                if (this.tableInfo[i].account === this.allOutPutInfo[j].account) {
+              for (let j = 0; j < this.allOutputInfo.length; j++) {
+                if (this.tableInfo[i].account === this.allOutputInfo[j].account) {
                   this.$refs.multipleTable.toggleRowSelection(this.tableInfo[i])
                 }
               }
@@ -168,9 +179,12 @@ export default {
               type: 'success',
               message: '删除成功!'
             })
-            this.getDate(this.resetPage)
             // 从总的标记数组中移除这个用户信息
-            this.allOutPutInfo.splice(this.allOutPutInfo.indexOf(row), 1)
+            let theRowIndexInAllInfo = this.allOutputInfo.map(value => JSON.stringify(value)).indexOf(JSON.stringify(row))
+            if (theRowIndexInAllInfo !== -1) {
+              this.allOutputInfo.splice(theRowIndexInAllInfo, 1)
+            }
+            this.getDate(this.resetPage)
           })
           .catch(error => {
             this.$message({
@@ -186,14 +200,28 @@ export default {
         })
       })
     },
-    handleSelectionChange (val) {
-      this.multipleTable = val
-      this.allOutPutInfo = this.multipleTable.concat(this.allOutPutInfo).filter((value, index, arr) => {
-        return arr.map(value_ => JSON.stringify(value_)).indexOf(JSON.stringify(value)) === index
-      })
+    handleSingleSelect (selection, row) {
+      let theRowIndexInAllInfo = this.allOutputInfo.map(value => JSON.stringify(value)).indexOf(JSON.stringify(row))
+      if (theRowIndexInAllInfo === -1) {
+        this.allOutputInfo = this.allOutputInfo.concat(row)
+      } else {
+        this.allOutputInfo.splice(theRowIndexInAllInfo, 1)
+      }
+    },
+    handleAllSelection (selection) {
+      if (selection.length !== 0) {
+        let set = new Set(this.allOutputInfo.concat(selection).map(value => JSON.stringify(value)))
+        this.allOutputInfo = [...set].map(value => JSON.parse(value))
+      } else {
+        this.allOutputInfo = this.allOutputInfo.concat(this.tableInfo).filter((value, index, arr) => {
+          let tempArr = arr.map(value_ => JSON.stringify(value_))
+          let tempValue = JSON.stringify(value)
+          return tempArr.indexOf(tempValue) === tempArr.lastIndexOf(tempValue)
+        })
+      }
     },
     deleteSelectInfo () {
-      if (this.allOutPutInfo.length === 0) {
+      if (this.allOutputInfo.length === 0) {
         this.$alert('请勾选信息后再操作！', '注意', '确定')
         return
       }
@@ -202,14 +230,17 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        this.$axios.post('/api/del_re_user', this.allOutPutInfo)
+        this.$axios.post('/api/del_re_user', this.allOutputInfo)
           .then(response => {
             this.$message({
               type: 'success',
               message: '删除成功!'
             })
+            if (this.allOutputInfo.length >= 20) {
+              this.resetPage = 1
+            }
             // 清空存放全部标记对象的数组
-            this.allOutPutInfo = []
+            this.allOutputInfo = []
             this.getDate(this.resetPage)
           })
           .catch(error => {
@@ -227,7 +258,7 @@ export default {
       })
     },
     recoverySelectInfo () {
-      if (this.allOutPutInfo.length === 0) {
+      if (this.allOutputInfo.length === 0) {
         this.$alert('请勾选信息后再操作！', '注意', '确定')
         return
       }
@@ -236,13 +267,13 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        this.$axios.post('/api/re_user', this.allOutPutInfo)
+        this.$axios.post('/api/re_user', this.allOutputInfo)
           .then(response => {
             this.$message({
               type: 'success',
               message: '恢复成功!'
             })
-            this.allOutPutInfo = []
+            this.allOutputInfo = []
             this.getDate(this.resetPage)
           })
           .catch(error => {

@@ -50,7 +50,8 @@
         ref="multipleTable"
         :data="tableData"
         :height="tableHeight"
-        @selection-change="handleSelectionChange"
+        @select-all="handleAllSelection"
+        @select="handleSingleSelect"
         stripe
         v-loading="theFirstGet">
         <el-table-column
@@ -186,12 +187,7 @@ export default {
       totalInfoNum: 10,
       inputTemplateCode: '',
       inputCompanySign: '',
-      historyCompanySign: [
-        {'value': '1a1'},
-        {'value': '2a2'},
-        {'value': '2A2'},
-        {'value': '3ba'}
-      ],
+      historyCompanySign: [],
       formInline: {
         keyword: '',
         infofrom: 'all',
@@ -214,17 +210,15 @@ export default {
         path: [{required: true, message: '不能为空', trigger: 'blur'}]
       },
       tableData: [],
-      multipleSelection: [],
       theFirstGet: true,
-      allOutPutInfo: []
+      allOutputInfo: []
     }
   },
   methods: {
     // 清空所选项
     clearSelection () {
       this.$refs.multipleTable.clearSelection()
-      this.allOutPutInfo = []
-      this.multipleSelection = []
+      this.allOutputInfo = []
     },
     // 获得所有历史输入的公司签名
     getHistoryCompanySign () {
@@ -328,7 +322,7 @@ export default {
         type: 'warning'
       }).then(() => {
         let loading = this.$loading({target: document.querySelector('.submit_message')})
-        this.$axios.post('/api/send_message', {templateCode: this.checked, acceptUsers: this.allOutPutInfo, signName: this.inputCompanySign})
+        this.$axios.post('/api/send_message', {templateCode: this.checked, acceptUsers: this.allOutputInfo, signName: this.inputCompanySign})
           .then(response => {
             this.dialogVisibleMessage = false
             this.$message({
@@ -354,19 +348,21 @@ export default {
     },
     // 导出商户信息
     outPutInfo () {
-      if (this.allOutPutInfo.length === 0) {
+      if (this.allOutputInfo.length === 0) {
         this.$alert('请勾选商户后再导出！', '注意', '确定')
         return
       }
-      if (this.allOutPutInfo.length >= 40) {
+      if (this.allOutputInfo.length >= 40) {
         this.$alert('单次导出不超过40个！', '注意', '确定')
         return
       }
-      this.$axios.post('/api/output_info', this.allOutPutInfo)
+      this.$axios.post('/api/output_info', this.allOutputInfo)
         .then(response => {
           if (!response) {
             return
           }
+          this.allOutputInfo = []
+          this.$refs.multipleTable.clearSelection()
           // 创建一个下载链接
           let url = window.URL.createObjectURL(new Blob([response.data]))
           // 创建一个 a 标签元素
@@ -467,7 +463,10 @@ export default {
       }).then(() => {
         this.$axios.post('/api/del_store', row)
           .then(response => {
-            this.allOutPutInfo.splice(this.allOutPutInfo.indexOf(row), 1)
+            let theRowIndexInAllInfo = this.allOutputInfo.map(value => JSON.stringify(value)).indexOf(JSON.stringify(row))
+            if (theRowIndexInAllInfo !== -1) {
+              this.allOutputInfo.splice(theRowIndexInAllInfo, 1)
+            }
             this.$message({
               type: 'success',
               message: '删除成功!'
@@ -488,16 +487,31 @@ export default {
         })
       })
     },
-    // 将数组指向为所选的对象数组
-    handleSelectionChange (val) {
-      this.multipleSelection = val
-      this.allOutPutInfo = this.multipleSelection.concat(this.allOutPutInfo).filter((value, index, arr) => {
-        return arr.map(value_ => JSON.stringify(value_)).indexOf(JSON.stringify(value)) === index
-      })
+    // 当选择全选框时触发，将当前页面所有信息不重复的加入到存放所有标记对象的数组里，同时控制取消全部信息
+    handleAllSelection (selection) {
+      if (selection.length !== 0) {
+        let set = new Set(this.allOutputInfo.concat(selection).map(value => JSON.stringify(value)))
+        this.allOutputInfo = [...set].map(value => JSON.parse(value))
+      } else {
+        this.allOutputInfo = this.allOutputInfo.concat(this.tableData).filter((value, index, arr) => {
+          let tempArr = arr.map(value_ => JSON.stringify(value_))
+          let tempValue = JSON.stringify(value)
+          return tempArr.indexOf(tempValue) === tempArr.lastIndexOf(tempValue)
+        })
+      }
+    },
+    // 添加单个标记信息，取消单个标记信息
+    handleSingleSelect (selection, row) {
+      let theRowIndexInAllInfo = this.allOutputInfo.map(value => JSON.stringify(value)).indexOf(JSON.stringify(row))
+      if (theRowIndexInAllInfo === -1) {
+        this.allOutputInfo = this.allOutputInfo.concat(row)
+      } else {
+        this.allOutputInfo.splice(theRowIndexInAllInfo, 1)
+      }
     },
     // 控制弹出的模板选择窗口
     sendMessageBox () {
-      if (this.allOutPutInfo.length === 0) {
+      if (this.allOutputInfo.length === 0) {
         this.$alert('请勾选商户后再点击群发短信！', '注意', '确定').then(() => {}).catch(() => {})
       } else {
         // 重置签名
@@ -516,8 +530,8 @@ export default {
           this.tableData = response.data.info
           setTimeout(() => {
             for (let i = 0; i < this.tableData.length; i++) {
-              for (let j = 0; j < this.allOutPutInfo.length; j++) {
-                if (this.tableData[i].web_link === this.allOutPutInfo[j].web_link) {
+              for (let j = 0; j < this.allOutputInfo.length; j++) {
+                if (this.tableData[i].web_link === this.allOutputInfo[j].web_link) {
                   this.$refs.multipleTable.toggleRowSelection(this.tableData[i])
                 }
               }

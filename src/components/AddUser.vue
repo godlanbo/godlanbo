@@ -54,6 +54,13 @@ export default {
       }).then(() => {
         this.$axios.post('/api/add_user', this.formInline)
           .then(response => {
+            if (!response.data.success) {
+              this.$message({
+                type: 'error',
+                message: response.data.error_message
+              })
+              return
+            }
             this.$message({
               type: 'success',
               message: '添加成功!'
@@ -106,6 +113,10 @@ export default {
 .el-divider{
   margin: 12px auto 30px auto;
   background-color: #3a4f80;
+}
+.el-select>>>.el-select__caret.el-input__icon.el-icon-arrow-up{
+  margin-right: -450px;
+  /*margin-left: 100px;*/
 }
 @media (max-width: 1300px){
   .el-form>>>.el-form-item__label{

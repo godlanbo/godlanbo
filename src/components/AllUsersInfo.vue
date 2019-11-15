@@ -27,7 +27,14 @@
     </el-dropdown>
     <el-input v-model="searchKeyWord" @keyup.enter.native="searchInfo" placeholder="用户相关信息"></el-input>
     <el-button type="primary" @click="searchInfo">查询</el-button>
-    <el-table ref="multipleTable" :data="usersDate"  :height="tableHeight" @selection-change="handleSelectionChange" stripe v-loading="theFirstGet">
+    <el-table
+      ref="multipleTable"
+      :data="usersDate"
+      :height="tableHeight"
+      @select-all="handleAllSelection"
+      @select="handleSingleSelect"
+      stripe
+      v-loading="theFirstGet">
       <el-table-column
           type="selection"
           width="55">
@@ -84,8 +91,7 @@ export default {
       index: '0',
       resetPage: 1,
       usersDate: [],
-      multipleTable: [],
-      allOutPutInfo: [],
+      allOutputInfo: [],
       searchKeyWord: '',
       theFirstGet: true
     }
@@ -124,8 +130,8 @@ export default {
           this.usersDate = response.data.user_info
           setTimeout(() => {
             for (let i = 0; i < this.usersDate.length; i++) {
-              for (let j = 0; j < this.allOutPutInfo.length; j++) {
-                if (this.usersDate[i].account === this.allOutPutInfo[j].account) {
+              for (let j = 0; j < this.allOutputInfo.length; j++) {
+                if (this.usersDate[i].account === this.allOutputInfo[j].account) {
                   this.$refs.multipleTable.toggleRowSelection(this.usersDate[i])
                 }
               }
@@ -166,6 +172,7 @@ export default {
           this.usersDate = response.data.user_info
           this.$store.commit('OpenSearchState')
           this.totalInfoNum = response.data.totalInfoNum
+          this.allOutputInfo = []
           loading.close()
           this.resetPage = 1
         })
@@ -184,7 +191,7 @@ export default {
       this.getDate(this.resetPage)
     },
     deleteSelectInfo () {
-      if (this.allOutPutInfo.length === 0) {
+      if (this.allOutputInfo.length === 0) {
         this.$alert('请勾选用户后再操作！', '注意', '确定')
         return
       }
@@ -193,12 +200,13 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        this.$axios.post('/api/del_user', this.allOutPutInfo)
+        this.$axios.post('/api/del_user', this.allOutputInfo)
           .then(response => {
-            if (this.allOutPutInfo.length === this.usersDate.length) {
-              this.resetPage -= 1
+            // 判断是否除条数大于每页最大显示数 是 获取第一页数据，并定向到第一页
+            if (this.allOutputInfo.length >= 20) {
+              this.resetPage = 1
             }
-            this.allOutPutInfo = []
+            this.allOutputInfo = []
             this.getDate(this.resetPage)
             this.$message({
               type: 'success',
@@ -220,7 +228,7 @@ export default {
       })
     },
     handleCommand (command) {
-      if (this.allOutPutInfo.length === 0) {
+      if (this.allOutputInfo.length === 0) {
         this.$alert('请勾选用户后再操作！', '注意', '确定')
       } else {
         this.$confirm('是否变更选中用户权限?', '提示', {
@@ -228,9 +236,9 @@ export default {
           cancelButtonText: '取消',
           type: 'warning'
         }).then(() => {
-          this.$axios.post('/api/modify_right', {toRight: command, allUser: this.allOutPutInfo})
+          this.$axios.post('/api/modify_right', {toRight: command, allUser: this.allOutputInfo})
             .then(response => {
-              this.allOutPutInfo = []
+              this.allOutputInfo = []
               this.getDate(this.resetPage)
               this.$message({
                 type: 'success',
@@ -252,11 +260,25 @@ export default {
         })
       }
     },
-    handleSelectionChange (val) {
-      this.multipleTable = val
-      this.allOutPutInfo = this.multipleTable.concat(this.allOutPutInfo).filter((value, index, arr) => {
-        return arr.map(value_ => JSON.stringify(value_)).indexOf(JSON.stringify(value)) === index
-      })
+    handleSingleSelect (selection, row) {
+      let theRowIndexInAllInfo = this.allOutputInfo.map(value => JSON.stringify(value)).indexOf(JSON.stringify(row))
+      if (theRowIndexInAllInfo === -1) {
+        this.allOutputInfo = this.allOutputInfo.concat(row)
+      } else {
+        this.allOutputInfo.splice(theRowIndexInAllInfo, 1)
+      }
+    },
+    handleAllSelection (selection) {
+      if (selection.length !== 0) {
+        let set = new Set(this.allOutputInfo.concat(selection).map(value => JSON.stringify(value)))
+        this.allOutputInfo = [...set].map(value => JSON.parse(value))
+      } else {
+        this.allOutputInfo = this.allOutputInfo.concat(this.usersDate).filter((value, index, arr) => {
+          let tempArr = arr.map(value_ => JSON.stringify(value_))
+          let tempValue = JSON.stringify(value)
+          return tempArr.indexOf(tempValue) === tempArr.lastIndexOf(tempValue)
+        })
+      }
     },
     handleEdit (index, row) {
       this.AllUsersInfo = !this.AllUsersInfo
@@ -271,9 +293,11 @@ export default {
       }).then(() => {
         this.$axios.post('/api/del_user', row)
           .then(response => {
-            this.usersDate.splice(index, 1)
-            this.multipleTable.splice(this.multipleTable.indexOf(row), 1)
-            this.allOutPutInfo.splice(this.allOutPutInfo.indexOf(row), 1)
+            let theRowIndexInAllInfo = this.allOutputInfo.map(value => JSON.stringify(value)).indexOf(JSON.stringify(row))
+            if (theRowIndexInAllInfo !== -1) {
+              this.allOutputInfo.splice(theRowIndexInAllInfo, 1)
+            }
+            this.getDate(this.resetPage)
             this.$message({
               type: 'success',
               message: '删除成功!'
