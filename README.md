@@ -1,4 +1,6 @@
-### Hi welcome 👋
+### Hi welcome 👋 
+
+![](https://komarev.com/ghpvc/?username=godlanbo&color=green)
 
 ![](https://github-readme-stats.vercel.app/api?username=godlanbo)
 <!--
